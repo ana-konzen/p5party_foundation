@@ -16,4 +16,6 @@ function setup() {
 
 function draw() {
   background("#333");
+  fill("red");
+  ellipse(256, 256, sin(frameCount * 0.01) * 100, 100);
 }
