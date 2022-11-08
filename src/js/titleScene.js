@@ -7,7 +7,7 @@ export function draw() {
   // draw info
   push();
   fill("white");
-  text("play scene", 10, 20);
+  text("title scene", 10, 20);
   pop();
 
   // draw title
