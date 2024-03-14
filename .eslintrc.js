@@ -25,10 +25,10 @@ module.exports = {
     sourceType: "module",
   },
   rules: {
-    indent: ["error", 2],
+    "indent": ["error", 2],
     "linebreak-style": ["error", "unix"],
-    quotes: ["error", "double"],
-    semi: ["error", "always"],
+    "quotes": ["error", "double"],
+    "semi": ["error", "always"],
     "prefer-const": ["error"],
     "no-var": ["error"],
   },

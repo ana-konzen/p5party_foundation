@@ -17,6 +17,7 @@ import * as titleScene from "./titleScene.js";
 import * as playScene from "./playScene.js";
 
 var currentScene; // the scene being displayed
+
 // all the available scenes
 export let scenes = {
   title: titleScene,
