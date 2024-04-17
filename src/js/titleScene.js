@@ -20,5 +20,5 @@ export function draw() {
 }
 
 export function mousePressed() {
-  changeScene(scenes.play);
+  changeScene(scenes.lobby);
 }

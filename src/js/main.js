@@ -15,6 +15,7 @@
 
 import * as titleScene from "./titleScene.js";
 import * as playScene from "./playScene.js";
+import * as lobbyScene from "./lobbyScene.js";
 
 var currentScene; // the scene being displayed
 
@@ -22,6 +23,7 @@ var currentScene; // the scene being displayed
 export let scenes = {
   title: titleScene,
   play: playScene,
+  lobby: lobbyScene,
 };
 
 // p5.js auto detects your setup() and draw() before "installing" itself but
@@ -35,6 +37,8 @@ Object.assign(window, {
 });
 
 function preload() {
+  partyConnect("wss://demoserver.p5party.org", "timer_demo");
+
   Object.values(scenes).forEach((scene) => scene.preload?.());
 }
 
