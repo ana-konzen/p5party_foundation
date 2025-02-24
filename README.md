@@ -1,8 +1,28 @@
 # p5.party Foundation
 
-A project template for more complex p5.js games.
+A project template for more complex games made with p5.js + p5.party (or just p5.js).
 
-This template allows you to organize your project as scenes, each defined in its own module. main.js calls preload and setup on all scenes and then delegates the draw and mousePressed events to the current scene. main.js also calls the scenes for "enter" and "exit" lifecycle events. Scenes can change the current scene by calling `changeScene(sceneName)`.
+## The Scene System
+
+This template organizes the game in scenes (e.g. title scene, gameplay scene, game over scene), each defined in its own module. The `main.js` file coordinates the scenes, loads them when the program starts, calling lifecycle functions, and delegating events to the current scene. See the [scene.template.js](src/js/scene.template.js) file for an overview of the scene functions.
+
+## JS Modules
+
+This template uses [ES6 modules](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules) to organize the code. Modules isolate parts of the code, making it easier to manage as it grows. p5.js looks for functions like setup() and draw() in the global scope, so `main.js` exports these functions by adding them as properties on the window object.
+
+## VS Code Extensions
+
+**[Live Server](https://marketplace.visualstudio.com/items?itemName=ritwickdey.LiveServer)**
+Used for serving the project locally. Configured in `.vscode/settings.json`
+
+**[ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint)**
+Warns about style issues in the code.
+
+**[Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode)**
+Formats code.
+
+**[Todo+](https://marketplace.visualstudio.com/items?itemName=fabiospampinato.vscode-todo-plus)**
+Simple todo manager used by `notes/todo.todo`.
 
 ## Tool Configuration
 
@@ -21,6 +41,13 @@ Configured in `package.json`
 **[git](https://git-scm.com/)**
 Used for version control.
 Configured in `.gitignore`
+
+**[devbox](https://www.jetify.com/devbox)**
+Used for managing the project's development environment.
+**You probably don't want or need devbox. I use it to manage my development environment independently for each project, which you probably don't need to do.**
+
+**[nodejs](https://nodejs.org/en/)**
+Though this project doesn't run in Node, it uses npm for managing dependencies so you'll need node installed for some things to work.
 
 ## Setup
 
