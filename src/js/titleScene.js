@@ -15,7 +15,7 @@ export function draw() {
   fill(noiseColor(millis() / 2000));
   textSize(50);
   textAlign(CENTER, CENTER);
-  text("foundation", width * 0.5, height * 0.5);
+  text("title", width * 0.5, height * 0.5);
   pop();
 }
 

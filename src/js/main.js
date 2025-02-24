@@ -6,7 +6,7 @@
  * scenes.
  *
  * A major organizing prinicple of this code is that it is organized into
- * "scenes". See sceneTemplate.js for more info.
+ * "scenes". See scene.template.js for more info.
  *
  * main.js exports a function changeScene() that scenes can use to switch to
  * other scenes.
@@ -25,40 +25,57 @@ export const scenes = {
 };
 
 // p5.js auto detects your setup() and draw() before "installing" itself but
-// since this code is a module the functions aren't global. This creates aliases
-// of the p5 functions on window, so p5.js can find them
-Object.assign(window, {
-  preload,
-  draw,
-  setup,
-  mousePressed,
-});
+// since this code is a module the functions aren't global. We define them
+// on the window object so p5.js can find them.
 
-function preload() {
+window.preload = function () {
   Object.values(scenes).forEach((scene) => scene.preload?.());
-}
+};
 
-function setup() {
+window.setup = function () {
   createCanvas(512, 512);
   noFill();
   noStroke();
 
   Object.values(scenes).forEach((scene) => scene.setup?.());
   changeScene(scenes.title);
-}
+};
 
-function draw() {
-  // update
+window.draw = function () {
+  // call update() and draw() on the current scene
+  // (if the scene exists and has those functions)
   currentScene?.update?.();
-
-  // draw
   currentScene?.draw?.();
+};
+
+/// forward event handlers to the current scene, if they handle them
+const p5Events = [
+  // keyboard
+  "keyPressed",
+  "keyReleased",
+  "keyTyped",
+
+  // mouse
+  "doubleClicked",
+  "mouseDragged",
+  "mouseReleased",
+  "mouseWheel",
+  "mouseMoved",
+  "mouseClicked",
+  "mousePressed",
+
+  // touch
+  "touchMoved",
+  "touchStarted",
+  "touchEnded",
+];
+
+for (const event of p5Events) {
+  window[event] = () => currentScene?.[event]?.();
 }
 
-function mousePressed() {
-  currentScene?.mousePressed?.();
-}
-
+/// changeScene
+// call this to tell the game to switch to a different scene
 export function changeScene(newScene) {
   if (!newScene) {
     console.error("newScene not provided");
