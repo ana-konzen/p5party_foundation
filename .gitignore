@@ -1,2 +1,8 @@
+# Ignore macOS system files
 .DS_Store
+
+# Ignore node_modules directory where all the dependencies are installed
 node_modules
+
+# Ignore environment variable files
+.env
