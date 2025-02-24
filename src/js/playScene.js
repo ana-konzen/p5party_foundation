@@ -196,36 +196,33 @@ function drawBlocks() {
     pop();
   }
 }
+
 function drawTreasures() {
+  push();
+  fill("yellow");
   for (const treasure of shared.treasures) {
     if (!treasure.alive) continue;
-    push();
-    fill("yellow");
     ellipse(treasure.x * CONFIG.grid.size + 32, treasure.y * CONFIG.grid.size + 32, 16, 16);
-    pop();
   }
+  pop();
 }
 
 function drawGuests() {
+  push();
   for (const guest of guests) {
-    push();
     fill(guest.color);
     ellipse(guest.x * CONFIG.grid.size + 32, guest.y * CONFIG.grid.size + 32, 64, 64);
-    pop();
   }
+  pop();
 }
 
 function drawScores() {
   let y = 30;
   push();
-
   textSize(20);
   for (const [id, score] of Object.entries(shared.scores)) {
     const guest = guests.find((guest) => guest.id === id);
-    console.log(id, JSON.stringify(guests));
-    console.log(guest);
     if (!guest) continue;
-    console.log(guest.color);
     fill(guest.color);
     text(score, 10, y);
     y += 20;
