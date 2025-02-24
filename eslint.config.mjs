@@ -58,6 +58,9 @@ export default [
       "space-before-blocks": ["error"],
       "no-trailing-spaces": ["error"],
       "curly": ["error", "multi-line", "consistent"],
+
+      // disable rules set in presets
+      "no-prototype-builtins": ["off"],
     },
   },
 ];

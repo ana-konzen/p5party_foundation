@@ -17,3 +17,10 @@ export function noiseColor(a = 0, b = 0, c = 0) {
     noise(a, b, c + 300) * 255
   );
 }
+
+export function removeItemFromArray(a, item) {
+  const index = a.indexOf(item);
+  if (index > -1) {
+    a.splice(index, 1);
+  }
+}
