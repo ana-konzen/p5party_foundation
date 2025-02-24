@@ -1,3 +1,17 @@
+/**
+ * Use Like this:
+ * ```
+ * const controls = new Controls();
+ * controls.bind("ArrowLeft", "left");
+ * function gameLoop() {
+ *  if (controls.left.down) ... // it's down now
+ *  if (controls.left.pressed) ... // first frame it's down
+ *  if (controls.left.released) ... // first frame it's up
+ *  controls.tick();
+ * }
+ * ```
+ */
+
 export class Controls {
   #keyBindings = {};
   // keyName: actionName

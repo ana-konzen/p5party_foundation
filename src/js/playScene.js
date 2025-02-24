@@ -1,16 +1,32 @@
 import { Controls } from "./controls.js";
-
+import { Camera } from "./camera.js";
+import { randomInt } from "./utilities.js";
 import { changeScene, scenes } from "./main.js";
 
-import { Camera } from "./camera.js";
+const CONFIG = {
+  grid: {
+    size: 64, // size of each grid cell in pixels
+    rows: 64, // number of rows in the grid
+    cols: 64, // number of columns in the grid
+  },
+  game: {
+    numTreasures: 1000,
+    numBlocks: 1000,
+    playerStartX: 2,
+    playerStartY: 2,
+  },
+  colors: ["red", "orange", "yellow", "green", "blue", "purple"],
+};
 
-import { randomInt } from "./utilities.js";
-
-const camera = new Camera();
+// p5.party shared objects
 let me;
 let guests;
 let shared;
 
+// setup camera
+const camera = new Camera();
+
+// setup controls
 export const controls = new Controls();
 controls.bind("ArrowUp", "up");
 controls.bind("w", "up");
@@ -27,23 +43,22 @@ export function preload() {
   shared = partyLoadShared("shared", {
     treasures: [], // array of { x, y, alive } objects
     blocks: [], // array of { x, y } objects
-    scores: {}, // object of { id: score } pairs
+    scores: {}, // object of "id: score" pairs
   });
 
-  me = partyLoadMyShared({
-    x: 2, // x location in grid cells
-    y: 2, // y location in grid cells
-    color: "gray",
-    id: randomInt(1000000) + "",
-  });
   guests = partyLoadGuestShareds();
+  me = partyLoadMyShared({
+    x: CONFIG.game.playerStartX, // x location in grid cells
+    y: CONFIG.game.playerStartY, // y location in grid cells
+    color: "gray", // color to draw avatar
+    id: randomInt(1000000) + "", // a unique string id
+  });
 }
 
 export function setup() {
   if (partyIsHost()) setupHost();
 
-  const colors = ["red", "orange", "yellow", "green", "blue", "purple"];
-  me.color = colors[(guests.length - 1) % colors.length];
+  me.color = CONFIG.colors[(guests.length - 1) % CONFIG.colors.length];
 }
 
 export function enter() {}
@@ -58,62 +73,69 @@ export function update() {
   if (controls.right.pressed) tryMove(1, 0);
 
   // camera
-  camera.follow(me.x * 64, me.y * 64, 0.1);
+  camera.follow(me.x * CONFIG.grid.size, me.y * CONFIG.grid.size, 0.1);
 
   // controls
   controls.tick();
 }
 
 function tryMove(x, y) {
+  // find the possible new location
   const newX = me.x + x;
   const newY = me.y + y;
-  for (const block of shared.blocks) {
-    if (block.x === newX && block.y === newY) return;
-  }
+
+  // reject if blocked
+  if (shared.blocks.find((block) => block.x === newX && block.y === newY)) return;
+
+  // apply the move
   me.x = newX;
   me.y = newY;
 }
 
 function setupHost() {
+  // to prevent unnecessary data transfer,
+  // we build larger pieces of map data (blocks/treasures) locally
+  // and assign it to shared all at once
+  // that way p5.party doesn't have to sync every change that occurs
+  // during generation
+
   // init treasures
 
   const treasures = [];
-  for (let i = 0; i < 1000; i++) {
+  for (let i = 0; i < CONFIG.game.numTreasures; i++) {
     treasures.push({
-      x: floor(random(64)),
-      y: floor(random(64)),
+      x: floor(random(CONFIG.grid.cols)),
+      y: floor(random(CONFIG.grid.rows)),
       alive: true,
     });
   }
-
-  // to prevent unnecessary data transfer,
-  // we build the treasures array locally
-  // and assign it shared all at once
   shared.treasures = treasures;
 
-  // init blocks
+  // init random blocks
   const blocks = [];
-  for (let i = 0; i < 1000; i++) {
+  for (let i = 0; i < CONFIG.game.numBlocks; i++) {
     blocks.push({
-      x: floor(random(64)),
-      y: floor(random(64)),
+      x: floor(random(CONFIG.grid.cols)),
+      y: floor(random(CONFIG.grid.rows)),
     });
   }
 
-  for (let i = 0; i < 64; i++) {
+  // init border blocks
+  for (let i = 0; i < CONFIG.grid.cols; i++) {
     blocks.push({ x: i, y: -1 });
-    blocks.push({ x: i, y: 64 });
+    blocks.push({ x: i, y: CONFIG.grid.rows });
     blocks.push({ x: -1, y: i });
-    blocks.push({ x: 64, y: i });
+    blocks.push({ x: CONFIG.grid.cols, y: i });
   }
 
   shared.blocks = blocks;
 }
 
 function updateHost() {
-  for (const guest of guests) {
-    for (const treasure of shared.treasures) {
-      if (!treasure.alive) continue;
+  // check for treasure collection
+  for (const treasure of shared.treasures) {
+    if (!treasure.alive) continue;
+    for (const guest of guests) {
       if (guest.x === treasure.x && guest.y === treasure.y) {
         treasure.alive = false;
         shared.scores[guest.id] = (shared.scores[guest.id] ?? 0) + 1;
@@ -125,7 +147,7 @@ function updateHost() {
 export function draw() {
   clear();
 
-  // draw game board
+  /// draw game board
   push();
   // scroll
   translate(width * 0.5, height * 0.5);
@@ -138,7 +160,7 @@ export function draw() {
   drawGuests();
   pop();
 
-  // draw overlay
+  /// draw overlay
   push();
   drawScores();
   pop();
@@ -148,25 +170,21 @@ export function mousePressed() {
   changeScene(scenes.title);
 }
 
+/// draw functions
 function drawGrid() {
   push();
-  const ROWS = 64;
-  const COLS = 64;
-  const SIZE = 64;
-
   noFill();
   stroke(0, 0, 0, 50);
-  for (let row = 0; row < ROWS; row++) {
-    for (let col = 0; col < COLS; col++) {
-      // fill((row + col) % 2 === 0 ? "#111" : "#222");
-      rect(col * SIZE, row * SIZE, SIZE, SIZE);
+  for (let row = 0; row < CONFIG.grid.rows; row++) {
+    for (let col = 0; col < CONFIG.grid.cols; col++) {
+      rect(col * CONFIG.grid.size, row * CONFIG.grid.size, CONFIG.grid.size, CONFIG.grid.size);
     }
   }
 
   noFill();
   stroke("black");
   strokeWeight(4);
-  rect(0, 0, ROWS * SIZE, COLS * SIZE);
+  rect(0, 0, CONFIG.grid.rows * CONFIG.grid.size, CONFIG.grid.cols * CONFIG.grid.size);
   pop();
 }
 
@@ -174,7 +192,7 @@ function drawBlocks() {
   for (const block of shared.blocks) {
     push();
     fill("#555");
-    rect(block.x * 64 + 4, block.y * 64 + 4, 56, 56);
+    rect(block.x * CONFIG.grid.size + 4, block.y * CONFIG.grid.size + 4, 56, 56);
     pop();
   }
 }
@@ -183,7 +201,7 @@ function drawTreasures() {
     if (!treasure.alive) continue;
     push();
     fill("yellow");
-    ellipse(treasure.x * 64 + 32, treasure.y * 64 + 32, 16, 16);
+    ellipse(treasure.x * CONFIG.grid.size + 32, treasure.y * CONFIG.grid.size + 32, 16, 16);
     pop();
   }
 }
@@ -192,7 +210,7 @@ function drawGuests() {
   for (const guest of guests) {
     push();
     fill(guest.color);
-    ellipse(guest.x * 64 + 32, guest.y * 64 + 32, 64, 64);
+    ellipse(guest.x * CONFIG.grid.size + 32, guest.y * CONFIG.grid.size + 32, 64, 64);
     pop();
   }
 }
