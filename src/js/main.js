@@ -16,10 +16,10 @@
 import * as titleScene from "./titleScene.js";
 import * as playScene from "./playScene.js";
 
-var currentScene; // the scene being displayed
+let currentScene; // the scene being displayed
 
 // all the available scenes
-export let scenes = {
+export const scenes = {
   title: titleScene,
   play: playScene,
 };
