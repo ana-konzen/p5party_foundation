@@ -1,17 +1,17 @@
 import { Controls } from "./controls.js";
 import { Camera } from "./camera.js";
-import { randomInt } from "./utilities.js";
+import { makeId, iterate2D } from "./utilities.js";
 import { changeScene, scenes } from "./main.js";
+import { generateMap } from "./map.js";
 
 const CONFIG = {
   grid: {
     size: 64, // size of each grid cell in pixels
-    rows: 64, // number of rows in the grid
-    cols: 64, // number of columns in the grid
+    cols: 33, // number of columns in the grid
+    rows: 33, // number of rows in the grid
   },
   game: {
     numTreasures: 1000,
-    numBlocks: 1000,
     playerStartX: 2,
     playerStartY: 2,
   },
@@ -41,8 +41,9 @@ export function preload() {
   partyConnect("wss://demoserver.p5party.org", "bakse-tomb");
 
   shared = partyLoadShared("shared", {
+    map: [[]], // 2D array of booleans
     treasures: [], // array of { x, y, alive } objects
-    blocks: [], // array of { x, y } objects
+    crates: [], // array of { x, y, alive } objects
     scores: {}, // object of "id: score" pairs
   });
 
@@ -51,7 +52,7 @@ export function preload() {
     x: CONFIG.game.playerStartX, // x location in grid cells
     y: CONFIG.game.playerStartY, // y location in grid cells
     color: "gray", // color to draw avatar
-    id: randomInt(1000000) + "", // a unique string id
+    id: makeId(), // a unique string id
   });
 }
 
@@ -59,6 +60,15 @@ export function setup() {
   if (partyIsHost()) setupHost();
 
   me.color = CONFIG.colors[(guests.length - 1) % CONFIG.colors.length];
+  console.log("me", me.color);
+
+  partySubscribe("moveCrate", (data) => {
+    if (!partyIsHost()) return;
+    const crate = shared.crates.find((c) => c.id === data.id);
+    if (!crate) return;
+    crate.x = data.newX;
+    crate.y = data.newY;
+  });
 }
 
 export function enter() {}
@@ -80,55 +90,52 @@ export function update() {
 }
 
 function tryMove(x, y) {
-  // find the possible new location
   const newX = me.x + x;
   const newY = me.y + y;
 
-  // reject if blocked
-  if (shared.blocks.find((block) => block.x === newX && block.y === newY)) return;
+  // reject if out of bounds
+  if (newX < 0 || newX >= CONFIG.grid.cols || newY < 0 || newY >= CONFIG.grid.rows) {
+    return;
+  }
 
-  // apply the move
+  // reject if blocked by map
+  if (shared.map[newX][newY]) {
+    return;
+  }
+
+  // reject if blocked by crate
+  const c = shared.crates.find((c) => c.x === newX && c.y === newY);
+  const otherSideWall = shared.map[newX + x][newY + y];
+  const otherSideCrate = shared.crates.find((c) => c.x === newX + x && c.y === newY + y && c.alive);
+  const otherSideTreasure = shared.treasures.find(
+    (t) => t.x === newX + x && t.y === newY + y && t.alive
+  );
+  const otherSideGuest = guests.find((g) => g.x === newX + x && g.y === newY + y);
+  const otherSideBlocked = otherSideCrate || otherSideWall || otherSideTreasure || otherSideGuest;
+  if (c && otherSideBlocked) return;
+
+  // push crate
+  if (c) {
+    partyEmit("moveCrate", { id: c.id, newX: c.x + x, newY: c.y + y });
+  }
+
+  // move
   me.x = newX;
   me.y = newY;
 }
 
 function setupHost() {
   // to prevent unnecessary data transfer,
-  // we build larger pieces of map data (blocks/treasures) locally
+  // we build larger pieces of map data (map/treasures) locally
   // and assign it to shared all at once
   // that way p5.party doesn't have to sync every change that occurs
   // during generation
 
-  // init treasures
+  const { map, treasures, crates } = generateMap(CONFIG.grid.cols, CONFIG.grid.rows);
 
-  const treasures = [];
-  for (let i = 0; i < CONFIG.game.numTreasures; i++) {
-    treasures.push({
-      x: floor(random(CONFIG.grid.cols)),
-      y: floor(random(CONFIG.grid.rows)),
-      alive: true,
-    });
-  }
+  shared.map = map;
   shared.treasures = treasures;
-
-  // init random blocks
-  const blocks = [];
-  for (let i = 0; i < CONFIG.game.numBlocks; i++) {
-    blocks.push({
-      x: floor(random(CONFIG.grid.cols)),
-      y: floor(random(CONFIG.grid.rows)),
-    });
-  }
-
-  // init border blocks
-  for (let i = 0; i < CONFIG.grid.cols; i++) {
-    blocks.push({ x: i, y: -1 });
-    blocks.push({ x: i, y: CONFIG.grid.rows });
-    blocks.push({ x: -1, y: i });
-    blocks.push({ x: CONFIG.grid.cols, y: i });
-  }
-
-  shared.blocks = blocks;
+  shared.crates = crates;
 }
 
 function updateHost() {
@@ -151,12 +158,19 @@ export function draw() {
   push();
   // scroll
   translate(width * 0.5, height * 0.5);
+  scale(1);
   translate(-camera.x, -camera.y);
+
+  // scroll (debug)
+  // translate(50, 50);
+  // scale(0.2);
+  // translate(-camera.x, -camera.y);
 
   // draw
   drawGrid();
-  drawBlocks();
+  drawMap();
   drawTreasures();
+  drawCrates();
   drawGuests();
   pop();
 
@@ -184,17 +198,20 @@ function drawGrid() {
   noFill();
   stroke("black");
   strokeWeight(4);
-  rect(0, 0, CONFIG.grid.rows * CONFIG.grid.size, CONFIG.grid.cols * CONFIG.grid.size);
+  rect(0, 0, CONFIG.grid.cols * CONFIG.grid.size, CONFIG.grid.rows * CONFIG.grid.size);
   pop();
 }
 
-function drawBlocks() {
-  for (const block of shared.blocks) {
-    push();
-    fill("#555");
-    rect(block.x * CONFIG.grid.size + 4, block.y * CONFIG.grid.size + 4, 56, 56);
-    pop();
+function drawMap() {
+  push();
+  fill("#555");
+  for (const [x, y, value] of iterate2D(shared.map)) {
+    if (value) {
+      rect(x * CONFIG.grid.size + 4, y * CONFIG.grid.size + 4, 56, 56);
+    }
   }
+
+  pop();
 }
 
 function drawTreasures() {
@@ -203,6 +220,16 @@ function drawTreasures() {
   for (const treasure of shared.treasures) {
     if (!treasure.alive) continue;
     ellipse(treasure.x * CONFIG.grid.size + 32, treasure.y * CONFIG.grid.size + 32, 16, 16);
+  }
+  pop();
+}
+
+function drawCrates() {
+  push();
+  fill("brown");
+  for (const crate of shared.crates) {
+    if (!crate.alive) continue;
+    rect(crate.x * CONFIG.grid.size + 4, crate.y * CONFIG.grid.size + 4, 56, 56);
   }
   pop();
 }

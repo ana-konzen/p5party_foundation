@@ -33,7 +33,7 @@ window.preload = function () {
 };
 
 window.setup = function () {
-  createCanvas(512, 512);
+  createCanvas(960, 540);
   noFill();
   noStroke();
 
