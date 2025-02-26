@@ -27,7 +27,7 @@ export function setup() {
 
 function onMoveCrate(data) {
   if (!partyIsHost()) return;
-  const crate = fitlerItems("crate").find((c) => c.id === data.id);
+  const crate = filterItems("crate").find((c) => c.id === data.id);
   if (!crate) return;
   crate.x = data.newX;
   crate.y = data.newY;
@@ -37,7 +37,7 @@ export function update() {
   if (!partyIsHost()) return;
 
   // check for treasure collection
-  const treasures = fitlerItems("treasure");
+  const treasures = filterItems("treasure");
   for (const treasure of treasures) {
     if (!treasure.alive) continue;
     for (const guest of guests) {
@@ -49,8 +49,8 @@ export function update() {
   }
 
   // operate floor switches
-  const floorSwitches = fitlerItems("floor_switch");
-  const crates = fitlerItems("crate");
+  const floorSwitches = filterItems("floor_switch");
+  const crates = filterItems("crate");
   for (const floorSwitch of floorSwitches) {
     const pressedByGuest = guests.some(
       (guest) => guest.x === floorSwitch.x && guest.y === floorSwitch.y
@@ -65,6 +65,6 @@ export function update() {
   }
 }
 
-function fitlerItems(type) {
+function filterItems(type) {
   return shared.items.filter((g) => g.type === type);
 }

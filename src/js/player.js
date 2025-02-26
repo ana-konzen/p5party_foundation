@@ -12,6 +12,7 @@ controls.bind("ArrowLeft", "left");
 controls.bind("a", "left");
 controls.bind("ArrowRight", "right");
 controls.bind("d", "right");
+controls.bind(" ", "shoot");
 
 let me;
 let guests;
@@ -24,6 +25,7 @@ export function preload() {
     color: "gray", // color to draw avatar
     id: makeId(), // a unique string id
     facing: "down", // direction to draw avatar
+    shooting: false, // if the player is shooting
   });
   guests = partyLoadGuestShareds();
   shared = partyLoadShared("shared");
@@ -50,6 +52,10 @@ export function update() {
   if (controls.right.pressed) {
     tryMove(1, 0);
     me.facing = "right";
+  }
+  if (controls.shoot.pressed) {
+    me.shooting = true;
+    // partyEmit("shoot", { x: me.x, y: me.y, facing: me.facing });
   }
 
   controls.tick();
