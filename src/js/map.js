@@ -75,7 +75,7 @@ export function generateMap(cols, rows) {
 }
 
 function frame(map, l, t, w, h, value = true) {
-  //   draw horizontal walls
+  // draw horizontal walls
   for (let x = l; x < l + w; x++) {
     set(map, x, t, value);
     set(map, x, t + h - 1, value);
@@ -87,7 +87,7 @@ function frame(map, l, t, w, h, value = true) {
   }
 }
 
-function set(map, y, x, value) {
+function set(map, x, y, value) {
   if (x < 0 || x >= map[0].length || y < 0 || y >= map.length) return;
   map[y][x] = value;
 }
