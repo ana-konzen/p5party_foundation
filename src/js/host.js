@@ -63,6 +63,6 @@ export function update() {
     const pressed = pressedByGuest || pressedByCrate;
     shared.gadgets
       .filter((g) => floorSwitch.targets.includes(g.id))
-      .forEach((door) => (door.closed = !pressed));
+      .forEach((door) => (door.blocking = !pressed));
   }
 }

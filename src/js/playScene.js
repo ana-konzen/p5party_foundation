@@ -111,7 +111,7 @@ function drawTreasures() {
 function drawGadgets() {
   push();
   for (const gadget of shared.gadgets) {
-    if (gadget.type === "door" && gadget.closed) {
+    if (gadget.type === "door" && gadget.blocking) {
       fill("#335");
       rect(gadget.x * CONFIG.grid.size + 4, gadget.y * CONFIG.grid.size + 4, 56, 56);
     }

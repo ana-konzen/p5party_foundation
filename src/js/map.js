@@ -55,13 +55,17 @@ export function generateMap(cols, rows) {
   // create outer border
   frame(map, 0, 0, cols, rows, true);
 
+  // create gadgets
   const gadgets = [];
 
   const door1Id = makeId();
   const door2Id = makeId();
-  gadgets.push({ x: 8, y: 4, type: "door", closed: true, id: door1Id });
-  gadgets.push({ x: 7, y: 5, type: "door", closed: true, id: door2Id });
-  gadgets.push({ x: 7, y: 3, type: "floor_switch", targets: [door1Id, door2Id], id: makeId() });
+  const door3Id = makeId();
+  gadgets.push({ x: 8, y: 4, type: "door", blocking: true, id: door1Id });
+  gadgets.push({ x: 4, y: 8, type: "door", blocking: true, id: door2Id });
+  gadgets.push({ x: 12, y: 8, type: "door", blocking: true, id: door3Id });
+  gadgets.push({ x: 7, y: 3, type: "floor_switch", targets: [door1Id, door3Id], id: makeId() });
+  gadgets.push({ x: 9, y: 7, type: "floor_switch", targets: [door2Id], id: makeId() });
 
   return { map, treasures, crates, gadgets };
 }

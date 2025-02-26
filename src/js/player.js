@@ -54,7 +54,7 @@ function tryMove(x, y) {
   if (shared.map[newX][newY]) return;
 
   // reject if blocked by closed door
-  if (shared.gadgets.some((g) => g.x === newX && g.y === newY && g.closed)) return;
+  if (shared.gadgets.some((g) => g.x === newX && g.y === newY && g.blocking)) return;
 
   // reject if blocked by crate
   const c = shared.crates.find((c) => c.x === newX && c.y === newY);
@@ -64,7 +64,11 @@ function tryMove(x, y) {
     (t) => t.x === newX + x && t.y === newY + y && t.alive
   );
   const otherSideGuest = guests.some((g) => g.x === newX + x && g.y === newY + y);
-  const otherSideBlocked = otherSideCrate || otherSideWall || otherSideTreasure || otherSideGuest;
+  const otherSideGadget = shared.gadgets.some(
+    (g) => g.x === newX + x && g.y === newY + y && g.blocking
+  );
+  const otherSideBlocked =
+    otherSideCrate || otherSideWall || otherSideTreasure || otherSideGuest || otherSideGadget;
   if (c && otherSideBlocked) return;
 
   // push crate
