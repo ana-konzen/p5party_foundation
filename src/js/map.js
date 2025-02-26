@@ -34,6 +34,7 @@ export function generateMap(cols, rows) {
         type: "treasure",
         alive: true,
         id: makeId(),
+        z: -1,
       });
     }
   }
@@ -53,10 +54,10 @@ export function generateMap(cols, rows) {
       //  c
       // ctc
       //  c
-      items.push({ x: col + 3, y: row + 4, type: "crate", alive: true, id: makeId() });
-      items.push({ x: col + 5, y: row + 4, type: "crate", alive: true, id: makeId() });
-      items.push({ x: col + 4, y: row + 3, type: "crate", alive: true, id: makeId() });
-      items.push({ x: col + 4, y: row + 5, type: "crate", alive: true, id: makeId() });
+      items.push({ x: col + 3, y: row + 4, type: "crate", alive: true, id: makeId(), z: 1 });
+      items.push({ x: col + 5, y: row + 4, type: "crate", alive: true, id: makeId(), z: 1 });
+      items.push({ x: col + 4, y: row + 3, type: "crate", alive: true, id: makeId(), z: 1 });
+      items.push({ x: col + 4, y: row + 5, type: "crate", alive: true, id: makeId(), z: 1 });
 
       // scatter some more
       for (let x = 0 + 2; x < 8 - 1; x++) {
@@ -64,12 +65,16 @@ export function generateMap(cols, rows) {
           if (x === 4 && y === 4) continue;
           if (Math.random() < 0.8) continue;
           if (!items.some((c) => c.x === col + x && c.y === row + y)) {
-            items.push({ x: col + x, y: row + y, type: "crate", alive: true, id: makeId() });
+            items.push({ x: col + x, y: row + y, type: "crate", alive: true, id: makeId(), z: 1 });
           }
         }
       }
     }
   }
+
+  // sort items by z. if z is undefined, it will be treated as 0
+  items.sort((a, b) => (a.z ?? 0) - (b.z ?? 0));
+  console.log(items);
 
   return { map, items };
 }
