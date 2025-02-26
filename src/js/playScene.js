@@ -56,9 +56,7 @@ export function draw() {
   // draw
   drawGrid();
   drawMap();
-  drawTreasures();
   drawGadgets();
-  drawCrates();
   drawGuests();
   pop();
 
@@ -98,36 +96,26 @@ function drawMap() {
   pop();
 }
 
-function drawTreasures() {
-  push();
-  fill("yellow");
-  for (const treasure of shared.treasures) {
-    if (!treasure.alive) continue;
-    ellipse(treasure.x * CONFIG.grid.size + 32, treasure.y * CONFIG.grid.size + 32, 16, 16);
-  }
-  pop();
-}
-
 function drawGadgets() {
   push();
   for (const gadget of shared.gadgets) {
-    if (gadget.type === "door" && gadget.closed) {
-      fill("#335");
-      rect(gadget.x * CONFIG.grid.size + 4, gadget.y * CONFIG.grid.size + 4, 56, 56);
-    }
+    if (!gadget.alive && !gadget.blocking && gadget.type !== "floor_switch") continue;
     if (gadget.type === "floor_switch") {
       fill("#335");
       ellipse(gadget.x * CONFIG.grid.size + 32, gadget.y * CONFIG.grid.size + 32, 48, 48);
     }
-  }
-  pop();
-}
-function drawCrates() {
-  push();
-  fill("brown");
-  for (const crate of shared.crates) {
-    if (!crate.alive) continue;
-    rect(crate.x * CONFIG.grid.size + 4, crate.y * CONFIG.grid.size + 4, 56, 56);
+    if (gadget.type === "treasure") {
+      fill("yellow");
+      ellipse(gadget.x * CONFIG.grid.size + 32, gadget.y * CONFIG.grid.size + 32, 16, 16);
+    }
+    if (gadget.type === "door") {
+      fill("#335");
+      rect(gadget.x * CONFIG.grid.size + 4, gadget.y * CONFIG.grid.size + 4, 56, 56);
+    }
+    if (gadget.type === "crate") {
+      fill("brown");
+      rect(gadget.x * CONFIG.grid.size + 4, gadget.y * CONFIG.grid.size + 4, 56, 56);
+    }
   }
   pop();
 }

@@ -3,44 +3,12 @@ import { array2D, makeId } from "./utilities.js";
 export function generateMap(cols, rows) {
   // init blocks
   const map = array2D(cols, rows, false);
-  const treasures = [];
-  const crates = [];
+  const gadgets = [];
 
   // frame the rooms
   for (let row = 0; row < rows - 1; row += 8) {
     for (let col = 0; col < cols - 1; col += 8) {
       frame(map, col, row, 9, 9);
-    }
-  }
-
-  // place the treasure
-  for (let row = 0; row < rows - 1; row += 8) {
-    for (let col = 0; col < cols - 1; col += 8) {
-      treasures.push({ x: col + 4, y: row + 4, alive: true });
-    }
-  }
-
-  // place the crates
-  for (let row = 0; row < rows - 1; row += 8) {
-    for (let col = 0; col < cols - 1; col += 8) {
-      //  c
-      // ctc
-      //  c
-      crates.push({ x: col + 3, y: row + 4, alive: true, id: makeId() });
-      crates.push({ x: col + 5, y: row + 4, alive: true, id: makeId() });
-      crates.push({ x: col + 4, y: row + 3, alive: true, id: makeId() });
-      crates.push({ x: col + 4, y: row + 5, alive: true, id: makeId() });
-
-      // scatter some more
-      for (let x = 0 + 2; x < 8 - 1; x++) {
-        for (let y = 0 + 2; y < 8 - 1; y++) {
-          if (x === 4 && y === 4) continue;
-          if (Math.random() < 0.8) continue;
-          if (!crates.some((c) => c.x === col + x && c.y === row + y)) {
-            crates.push({ x: col + x, y: row + y, alive: true, id: makeId() });
-          }
-        }
-      }
     }
   }
 
@@ -55,15 +23,55 @@ export function generateMap(cols, rows) {
   // create outer border
   frame(map, 0, 0, cols, rows, true);
 
-  const gadgets = [];
+  // create gadgets
+
+  // place the treasure
+  for (let row = 0; row < rows - 1; row += 8) {
+    for (let col = 0; col < cols - 1; col += 8) {
+      gadgets.push({
+        x: col + 4,
+        y: row + 4,
+        type: "treasure",
+        alive: true,
+        id: makeId(),
+      });
+    }
+  }
 
   const door1Id = makeId();
   const door2Id = makeId();
-  gadgets.push({ x: 8, y: 4, type: "door", closed: true, id: door1Id });
-  gadgets.push({ x: 7, y: 5, type: "door", closed: true, id: door2Id });
-  gadgets.push({ x: 7, y: 3, type: "floor_switch", targets: [door1Id, door2Id], id: makeId() });
+  const door3Id = makeId();
+  gadgets.push({ x: 8, y: 4, type: "door", blocking: true, id: door1Id });
+  gadgets.push({ x: 4, y: 8, type: "door", blocking: true, id: door2Id });
+  gadgets.push({ x: 12, y: 8, type: "door", blocking: true, id: door3Id });
+  gadgets.push({ x: 7, y: 3, type: "floor_switch", targets: [door1Id, door3Id], id: makeId() });
+  gadgets.push({ x: 9, y: 7, type: "floor_switch", targets: [door2Id], id: makeId() });
 
-  return { map, treasures, crates, gadgets };
+  // place the crates
+  for (let row = 0; row < rows - 1; row += 8) {
+    for (let col = 0; col < cols - 1; col += 8) {
+      //  c
+      // ctc
+      //  c
+      gadgets.push({ x: col + 3, y: row + 4, type: "crate", alive: true, id: makeId() });
+      gadgets.push({ x: col + 5, y: row + 4, type: "crate", alive: true, id: makeId() });
+      gadgets.push({ x: col + 4, y: row + 3, type: "crate", alive: true, id: makeId() });
+      gadgets.push({ x: col + 4, y: row + 5, type: "crate", alive: true, id: makeId() });
+
+      // scatter some more
+      for (let x = 0 + 2; x < 8 - 1; x++) {
+        for (let y = 0 + 2; y < 8 - 1; y++) {
+          if (x === 4 && y === 4) continue;
+          if (Math.random() < 0.8) continue;
+          if (!gadgets.some((c) => c.x === col + x && c.y === row + y)) {
+            gadgets.push({ x: col + x, y: row + y, type: "crate", alive: true, id: makeId() });
+          }
+        }
+      }
+    }
+  }
+
+  return { map, gadgets };
 }
 
 function frame(map, l, t, w, h, value = true) {
