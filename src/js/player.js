@@ -23,6 +23,7 @@ export function preload() {
     y: CONFIG.game.playerStartY, // y location in grid cells
     color: "gray", // color to draw avatar
     id: makeId(), // a unique string id
+    facing: "down", // direction to draw avatar
   });
   guests = partyLoadGuestShareds();
   shared = partyLoadShared("shared");
@@ -33,10 +34,23 @@ export function setup() {
 }
 
 export function update() {
-  if (controls.up.pressed) tryMove(0, -1);
-  if (controls.down.pressed) tryMove(0, 1);
-  if (controls.left.pressed) tryMove(-1, 0);
-  if (controls.right.pressed) tryMove(1, 0);
+  if (controls.up.pressed) {
+    tryMove(0, -1);
+    console.log(controls);
+    me.facing = "up";
+  }
+  if (controls.down.pressed) {
+    tryMove(0, 1);
+    me.facing = "down";
+  }
+  if (controls.left.pressed) {
+    tryMove(-1, 0);
+    me.facing = "left";
+  }
+  if (controls.right.pressed) {
+    tryMove(1, 0);
+    me.facing = "right";
+  }
 
   controls.tick();
 }

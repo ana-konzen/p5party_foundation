@@ -125,10 +125,22 @@ function drawItems() {
 }
 
 function drawGuests() {
+  const directionDict = {
+    down: 0,
+    up: PI,
+    left: PI / 2,
+    right: -PI / 2,
+  };
   push();
   for (const guest of guests) {
+    push();
+    translate(guest.x * CONFIG.grid.size + 32, guest.y * CONFIG.grid.size + 32);
+    rotate(directionDict[guest.facing]);
     fill(guest.color);
-    ellipse(guest.x * CONFIG.grid.size + 32, guest.y * CONFIG.grid.size + 32, 64, 64);
+    ellipse(0, 0, 64, 64);
+    fill("white");
+    ellipse(0, 24, 16, 16);
+    pop();
   }
   pop();
 }
