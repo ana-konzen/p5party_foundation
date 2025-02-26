@@ -55,7 +55,15 @@ export function generateMap(cols, rows) {
   // create outer border
   frame(map, 0, 0, cols, rows, true);
 
-  return { map, treasures, crates };
+  const gadgets = [];
+
+  const door1Id = makeId();
+  const door2Id = makeId();
+  gadgets.push({ x: 8, y: 4, type: "door", closed: true, id: door1Id });
+  gadgets.push({ x: 7, y: 5, type: "door", closed: true, id: door2Id });
+  gadgets.push({ x: 7, y: 3, type: "floor_switch", targets: [door1Id, door2Id], id: makeId() });
+
+  return { map, treasures, crates, gadgets };
 }
 
 function frame(map, l, t, w, h, value = true) {

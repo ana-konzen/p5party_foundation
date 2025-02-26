@@ -57,6 +57,7 @@ export function draw() {
   drawGrid();
   drawMap();
   drawTreasures();
+  drawGadgets();
   drawCrates();
   drawGuests();
   pop();
@@ -107,6 +108,20 @@ function drawTreasures() {
   pop();
 }
 
+function drawGadgets() {
+  push();
+  for (const gadget of shared.gadgets) {
+    if (gadget.type === "door" && gadget.closed) {
+      fill("#335");
+      rect(gadget.x * CONFIG.grid.size + 4, gadget.y * CONFIG.grid.size + 4, 56, 56);
+    }
+    if (gadget.type === "floor_switch") {
+      fill("#335");
+      ellipse(gadget.x * CONFIG.grid.size + 32, gadget.y * CONFIG.grid.size + 32, 48, 48);
+    }
+  }
+  pop();
+}
 function drawCrates() {
   push();
   fill("brown");
