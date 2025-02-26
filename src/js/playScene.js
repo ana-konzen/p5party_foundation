@@ -103,18 +103,22 @@ function drawItems() {
     if (item.type === "floor_switch") {
       fill("#335");
       ellipse(item.x * CONFIG.grid.size + 32, item.y * CONFIG.grid.size + 32, 48, 48);
+      continue;
     }
     if (item.type === "treasure") {
       fill("yellow");
       ellipse(item.x * CONFIG.grid.size + 32, item.y * CONFIG.grid.size + 32, 16, 16);
+      continue;
     }
     if (item.type === "door") {
       fill("#335");
       rect(item.x * CONFIG.grid.size + 4, item.y * CONFIG.grid.size + 4, 56, 56);
+      continue;
     }
     if (item.type === "crate") {
       fill("brown");
       rect(item.x * CONFIG.grid.size + 4, item.y * CONFIG.grid.size + 4, 56, 56);
+      continue;
     }
   }
   pop();
