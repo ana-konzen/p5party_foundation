@@ -56,13 +56,14 @@ export function draw() {
   // draw
   drawGrid();
   drawMap();
-  drawGadgets();
+  drawItems();
   drawGuests();
   pop();
 
   /// draw overlay
   push();
   drawScores();
+  drawAmmo();
   pop();
 }
 
@@ -96,35 +97,45 @@ function drawMap() {
   pop();
 }
 
-function drawGadgets() {
+function drawItems() {
   push();
-  for (const gadget of shared.gadgets) {
-    if (!gadget.alive && !gadget.blocking && gadget.type !== "floor_switch") continue;
-    if (gadget.type === "floor_switch") {
-      fill("#335");
-      ellipse(gadget.x * CONFIG.grid.size + 32, gadget.y * CONFIG.grid.size + 32, 48, 48);
-    }
-    if (gadget.type === "treasure") {
-      fill("yellow");
-      ellipse(gadget.x * CONFIG.grid.size + 32, gadget.y * CONFIG.grid.size + 32, 16, 16);
-    }
-    if (gadget.type === "door") {
-      fill("#335");
-      rect(gadget.x * CONFIG.grid.size + 4, gadget.y * CONFIG.grid.size + 4, 56, 56);
-    }
-    if (gadget.type === "crate") {
-      fill("brown");
-      rect(gadget.x * CONFIG.grid.size + 4, gadget.y * CONFIG.grid.size + 4, 56, 56);
-    }
+  for (const item of shared.items) {
+    if (!item.alive && !item.blocking && item.type !== "floorSwitch") continue;
+    drawItem(item);
   }
   pop();
 }
 
+function drawItem(item) {
+  ellipseMode(CORNER);
+  const itemColor = color(item.color);
+  itemColor.setAlpha(item.alpha ?? 255);
+  fill(itemColor);
+  const shape = item.shape === "rect" ? rect : ellipse;
+  shape(
+    item.x * CONFIG.grid.size + (CONFIG.grid.size / 2 - item.size / 2),
+    item.y * CONFIG.grid.size + (CONFIG.grid.size / 2 - item.size / 2),
+    item.size
+  );
+}
+
 function drawGuests() {
+  const directionDict = {
+    down: 0,
+    up: PI,
+    left: PI / 2,
+    right: -PI / 2,
+  };
   push();
   for (const guest of guests) {
+    push();
+    translate(guest.x * CONFIG.grid.size + 32, guest.y * CONFIG.grid.size + 32);
+    rotate(directionDict[guest.facing]);
     fill(guest.color);
-    ellipse(guest.x * CONFIG.grid.size + 32, guest.y * CONFIG.grid.size + 32, 64, 64);
+    ellipse(0, 0, 64);
+    fill("white");
+    ellipse(0, 24, 16);
+    pop();
   }
   pop();
 }
@@ -139,6 +150,16 @@ function drawScores() {
     fill(guest.color);
     text(score, 10, y);
     y += 20;
+  }
+  pop();
+}
+
+function drawAmmo() {
+  push();
+  noStroke();
+  for (let i = 0; i < me.ammo; i++) {
+    fill(me.color);
+    ellipse(20 + i * 20, height - 20, 16);
   }
   pop();
 }

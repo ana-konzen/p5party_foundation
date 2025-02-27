@@ -12,6 +12,7 @@ controls.bind("ArrowLeft", "left");
 controls.bind("a", "left");
 controls.bind("ArrowRight", "right");
 controls.bind("d", "right");
+controls.bind(" ", "shoot");
 
 let me;
 let guests;
@@ -23,6 +24,8 @@ export function preload() {
     y: CONFIG.game.playerStartY, // y location in grid cells
     color: "gray", // color to draw avatar
     id: makeId(), // a unique string id
+    facing: "down", // direction to draw avatar
+    ammo: CONFIG.game.playerAmmo, // number of bullets player has
   });
   guests = partyLoadGuestShareds();
   shared = partyLoadShared("shared");
@@ -33,10 +36,28 @@ export function setup() {
 }
 
 export function update() {
-  if (controls.up.pressed) tryMove(0, -1);
-  if (controls.down.pressed) tryMove(0, 1);
-  if (controls.left.pressed) tryMove(-1, 0);
-  if (controls.right.pressed) tryMove(1, 0);
+  if (controls.up.pressed) {
+    tryMove(0, -1);
+    console.log(controls);
+    me.facing = "up";
+  }
+  if (controls.down.pressed) {
+    tryMove(0, 1);
+    me.facing = "down";
+  }
+  if (controls.left.pressed) {
+    tryMove(-1, 0);
+    me.facing = "left";
+  }
+  if (controls.right.pressed) {
+    tryMove(1, 0);
+    me.facing = "right";
+  }
+  if (controls.shoot.pressed) {
+    if (me.ammo <= 0) return;
+    me.ammo--;
+    partyEmit("shoot", { x: me.x, y: me.y, facing: me.facing, color: me.color });
+  }
 
   controls.tick();
 }
@@ -53,18 +74,18 @@ function tryMove(x, y) {
   // reject if blocked by map
   if (shared.map[newX][newY]) return;
 
-  // reject if blocked by closed door
-  if (shared.gadgets.some((g) => g.x === newX && g.y === newY && g.blocking)) return;
+  // reject if blocked by blocking item (like doors)
+  if (shared.items.some((g) => g.x === newX && g.y === newY && g.blocking)) return;
 
   // reject if blocked by crate
-  const crates = shared.gadgets.filter((g) => g.type === "crate");
+  const crates = shared.items.filter((g) => g.type === "crate" && g.alive);
   const c = crates.find((c) => c.x === newX && c.y === newY);
   const otherSideWall = shared.map[newX + x][newY + y];
   const otherSideGuest = guests.some((g) => g.x === newX + x && g.y === newY + y);
-  const otherSideGadget = shared.gadgets.some(
+  const otherSideItem = shared.items.some(
     (g) => g.x === newX + x && g.y === newY + y && (g.blocking || g.alive)
   );
-  const otherSideBlocked = otherSideWall || otherSideGuest || otherSideGadget;
+  const otherSideBlocked = otherSideWall || otherSideGuest || otherSideItem;
   if (c && otherSideBlocked) return;
 
   // push crate
