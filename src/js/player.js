@@ -25,7 +25,7 @@ export function preload() {
     color: "gray", // color to draw avatar
     id: makeId(), // a unique string id
     facing: "down", // direction to draw avatar
-    shooting: false, // if the player is shooting
+    ammo: CONFIG.game.playerAmmo, // number of bullets player has
   });
   guests = partyLoadGuestShareds();
   shared = partyLoadShared("shared");
@@ -54,7 +54,8 @@ export function update() {
     me.facing = "right";
   }
   if (controls.shoot.pressed) {
-    me.shooting = true;
+    if (me.ammo <= 0) return;
+    me.ammo--;
     partyEmit("shoot", { x: me.x, y: me.y, facing: me.facing, color: me.color });
   }
 

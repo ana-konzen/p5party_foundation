@@ -63,6 +63,7 @@ export function draw() {
   /// draw overlay
   push();
   drawScores();
+  drawAmmo();
   pop();
 }
 
@@ -149,6 +150,16 @@ function drawScores() {
     fill(guest.color);
     text(score, 10, y);
     y += 20;
+  }
+  pop();
+}
+
+function drawAmmo() {
+  push();
+  noStroke();
+  for (let i = 0; i < me.ammo; i++) {
+    fill(me.color);
+    ellipse(20 + i * 20, height - 20, 16);
   }
   pop();
 }

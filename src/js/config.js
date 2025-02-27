@@ -9,6 +9,7 @@ export const CONFIG = {
     playerStartX: 2,
     playerStartY: 2,
     bulletSpeed: 0.1,
+    playerAmmo: 10,
   },
   colors: ["red", "orange", "yellow", "green", "blue", "purple"],
 };
