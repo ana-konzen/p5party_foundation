@@ -87,14 +87,12 @@ export function generateMap(cols, rows) {
         size: 56,
         shape: "rect",
         blocking: blocking ?? true,
-        z: z ?? 0,
       },
       floorSwitch: {
         color: color ?? "#335",
         size: 48,
         shape: "ellipse",
         targets: targets ?? [],
-        z: z ?? 0,
       },
     };
     items.push({
