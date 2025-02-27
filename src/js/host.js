@@ -113,7 +113,7 @@ export function update() {
 
     // check for collision with crates
     const maxCrateHits = 3;
-    const crate = crates.find((c) => c.x === roundedX && c.y === roundedY);
+    const crate = crates.find((c) => c.x === roundedX && c.y === roundedY && c.alive);
     if (crate) {
       crate.hits++;
       crate.alpha = map(crate.hits, 0, maxCrateHits, 255, 0);
