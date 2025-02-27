@@ -107,7 +107,9 @@ function drawItems() {
 
 function drawItem(item) {
   ellipseMode(CORNER);
-  fill(item.color);
+  const itemColor = color(item.color);
+  itemColor.setAlpha(item.alpha ?? 255);
+  fill(itemColor);
   const shape = item.shape === "rect" ? rect : ellipse;
   shape(
     item.x * CONFIG.grid.size + (CONFIG.grid.size / 2 - item.size / 2),

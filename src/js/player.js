@@ -55,7 +55,7 @@ export function update() {
   }
   if (controls.shoot.pressed) {
     me.shooting = true;
-    // partyEmit("shoot", { x: me.x, y: me.y, facing: me.facing });
+    partyEmit("shoot", { x: me.x, y: me.y, facing: me.facing, color: me.color });
   }
 
   controls.tick();
@@ -73,11 +73,11 @@ function tryMove(x, y) {
   // reject if blocked by map
   if (shared.map[newX][newY]) return;
 
-  // reject if blocked by closed door
+  // reject if blocked by blocking item (like doors)
   if (shared.items.some((g) => g.x === newX && g.y === newY && g.blocking)) return;
 
   // reject if blocked by crate
-  const crates = shared.items.filter((g) => g.type === "crate");
+  const crates = shared.items.filter((g) => g.type === "crate" && g.alive);
   const c = crates.find((c) => c.x === newX && c.y === newY);
   const otherSideWall = shared.map[newX + x][newY + y];
   const otherSideGuest = guests.some((g) => g.x === newX + x && g.y === newY + y);

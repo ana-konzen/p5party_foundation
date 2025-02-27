@@ -72,6 +72,7 @@ export function generateMap(cols, rows) {
         hits: hits ?? 0,
         alive: alive ?? true,
         color: color ?? "brown",
+        alpha: 255,
         z: z ?? 1,
       },
       treasure: {

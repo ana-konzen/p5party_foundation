@@ -8,6 +8,7 @@ export const CONFIG = {
     numTreasures: 1000,
     playerStartX: 2,
     playerStartY: 2,
+    bulletSpeed: 0.1,
   },
   colors: ["red", "orange", "yellow", "green", "blue", "purple"],
 };
