@@ -99,29 +99,21 @@ function drawMap() {
 function drawItems() {
   push();
   for (const item of shared.items) {
-    if (!item.alive && !item.blocking && item.type !== "floor_switch") continue;
-    if (item.type === "floor_switch") {
-      fill("#335");
-      ellipse(item.x * CONFIG.grid.size + 32, item.y * CONFIG.grid.size + 32, 48, 48);
-      continue;
-    }
-    if (item.type === "treasure") {
-      fill("yellow");
-      ellipse(item.x * CONFIG.grid.size + 32, item.y * CONFIG.grid.size + 32, 16, 16);
-      continue;
-    }
-    if (item.type === "door") {
-      fill("#335");
-      rect(item.x * CONFIG.grid.size + 4, item.y * CONFIG.grid.size + 4, 56, 56);
-      continue;
-    }
-    if (item.type === "crate") {
-      fill("brown");
-      rect(item.x * CONFIG.grid.size + 4, item.y * CONFIG.grid.size + 4, 56, 56);
-      continue;
-    }
+    if (!item.alive && !item.blocking && item.type !== "floorSwitch") continue;
+    drawItem(item);
   }
   pop();
+}
+
+function drawItem(item) {
+  ellipseMode(CORNER);
+  fill(item.color);
+  const shape = item.shape === "rect" ? rect : ellipse;
+  shape(
+    item.x * CONFIG.grid.size + (CONFIG.grid.size / 2 - item.size / 2),
+    item.y * CONFIG.grid.size + (CONFIG.grid.size / 2 - item.size / 2),
+    item.size
+  );
 }
 
 function drawGuests() {
@@ -137,9 +129,9 @@ function drawGuests() {
     translate(guest.x * CONFIG.grid.size + 32, guest.y * CONFIG.grid.size + 32);
     rotate(directionDict[guest.facing]);
     fill(guest.color);
-    ellipse(0, 0, 64, 64);
+    ellipse(0, 0, 64);
     fill("white");
-    ellipse(0, 24, 16, 16);
+    ellipse(0, 24, 16);
     pop();
   }
   pop();

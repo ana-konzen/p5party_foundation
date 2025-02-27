@@ -28,25 +28,18 @@ export function generateMap(cols, rows) {
   // place the treasure
   for (let row = 0; row < rows - 1; row += 8) {
     for (let col = 0; col < cols - 1; col += 8) {
-      items.push({
-        x: col + 4,
-        y: row + 4,
-        type: "treasure",
-        alive: true,
-        id: makeId(),
-        z: -1,
-      });
+      addItem({ x: col + 4, y: row + 4, type: "treasure" });
     }
   }
 
   const door1Id = makeId();
   const door2Id = makeId();
   const door3Id = makeId();
-  items.push({ x: 8, y: 4, type: "door", blocking: true, id: door1Id });
-  items.push({ x: 4, y: 8, type: "door", blocking: true, id: door2Id });
-  items.push({ x: 12, y: 8, type: "door", blocking: true, id: door3Id });
-  items.push({ x: 7, y: 3, type: "floor_switch", targets: [door1Id, door3Id], id: makeId() });
-  items.push({ x: 9, y: 7, type: "floor_switch", targets: [door2Id], id: makeId() });
+  addItem({ x: 8, y: 4, type: "door", id: door1Id });
+  addItem({ x: 4, y: 8, type: "door", id: door2Id });
+  addItem({ x: 12, y: 8, type: "door", id: door3Id });
+  addItem({ x: 7, y: 3, type: "floorSwitch", targets: [door1Id, door3Id] });
+  addItem({ x: 9, y: 7, type: "floorSwitch", targets: [door2Id] });
 
   // place the crates
   for (let row = 0; row < rows - 1; row += 8) {
@@ -54,10 +47,10 @@ export function generateMap(cols, rows) {
       //  c
       // ctc
       //  c
-      items.push({ x: col + 3, y: row + 4, type: "crate", alive: true, id: makeId(), z: 1 });
-      items.push({ x: col + 5, y: row + 4, type: "crate", alive: true, id: makeId(), z: 1 });
-      items.push({ x: col + 4, y: row + 3, type: "crate", alive: true, id: makeId(), z: 1 });
-      items.push({ x: col + 4, y: row + 5, type: "crate", alive: true, id: makeId(), z: 1 });
+      addItem({ x: col + 3, y: row + 4, type: "crate" });
+      addItem({ x: col + 5, y: row + 4, type: "crate" });
+      addItem({ x: col + 4, y: row + 3, type: "crate" });
+      addItem({ x: col + 4, y: row + 5, type: "crate" });
 
       // scatter some more
       for (let x = 0 + 2; x < 8 - 1; x++) {
@@ -65,13 +58,52 @@ export function generateMap(cols, rows) {
           if (x === 4 && y === 4) continue;
           if (Math.random() < 0.8) continue;
           if (!items.some((c) => c.x === col + x && c.y === row + y)) {
-            items.push({ x: col + x, y: row + y, type: "crate", alive: true, id: makeId(), z: 1 });
+            addItem({ x: col + x, y: row + y, type: "crate" });
           }
         }
       }
     }
   }
-
+  function addItem({ x, y, type, id, z, hits, color, alive, blocking, targets }) {
+    const props = {
+      crate: {
+        size: 56,
+        shape: "rect",
+        hits: hits ?? 0,
+        alive: alive ?? true,
+        color: color ?? "brown",
+        z: z ?? 1,
+      },
+      treasure: {
+        size: 16,
+        shape: "ellipse",
+        alive: alive ?? true,
+        color: color ?? "yellow",
+        z: z ?? -1,
+      },
+      door: {
+        color: color ?? "#335",
+        size: 56,
+        shape: "rect",
+        blocking: blocking ?? true,
+        z: z ?? 0,
+      },
+      floorSwitch: {
+        color: color ?? "#335",
+        size: 48,
+        shape: "ellipse",
+        targets: targets ?? [],
+        z: z ?? 0,
+      },
+    };
+    items.push({
+      x,
+      y,
+      type,
+      id: id ?? makeId(),
+      ...props[type],
+    });
+  }
   // sort items by z. if z is undefined, it will be treated as 0
   items.sort((a, b) => (a.z ?? 0) - (b.z ?? 0));
   console.log(items);
