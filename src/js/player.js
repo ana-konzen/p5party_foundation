@@ -54,9 +54,10 @@ export function update() {
     me.facing = "right";
   }
   if (controls.shoot.pressed) {
-    if (me.ammo <= 0) return;
-    me.ammo--;
-    partyEmit("shoot", { x: me.x, y: me.y, facing: me.facing, color: me.color });
+    if (me.ammo > 0) {
+      me.ammo--;
+      partyEmit("shoot", { x: me.x, y: me.y, facing: me.facing, color: me.color });
+    }
   }
 
   controls.tick();
