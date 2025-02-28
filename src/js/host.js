@@ -74,9 +74,9 @@ export function update() {
       (crate) => crate.x === floorSwitch.x && crate.y === floorSwitch.y
     );
     const pressed = pressedByGuest || pressedByCrate;
-    shared.items
+    itemsOfType("door")
       .filter((g) => floorSwitch.targets.includes(g.id))
-      .forEach((door) => (door.blocking = !pressed));
+      .forEach((door) => (door.open = pressed));
   }
 
   // handle bullet movement
@@ -101,7 +101,7 @@ export function update() {
     // check for collision with walls and closed doors
     if (
       shared.map[roundedX]?.[roundedY] ||
-      itemsOfType("door").some((d) => d.x === roundedX && d.y === roundedY && d.blocking)
+      itemsOfType("door").some((door) => door.x === roundedX && door.y === roundedY && !door.open)
     ) {
       bullet.remove = true;
       continue;

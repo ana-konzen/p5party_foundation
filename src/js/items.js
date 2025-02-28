@@ -40,7 +40,7 @@ export function drawItems(items) {
   const sortedItems = [...items].sort((a, b) => (a.z ?? 0) - (b.z ?? 0));
   for (const item of sortedItems) {
     // don't draw open doors
-    if (item.type === "door" && !item.blocking) continue;
+    if (item.type === "door" && item.open) continue;
     drawItem(item);
   }
   pop();

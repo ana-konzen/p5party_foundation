@@ -76,10 +76,10 @@ function tryMove(x, y) {
   if (shared.map[newX][newY]) return;
 
   // reject if blocked by blocking item (like doors)
-  if (shared.items.some((g) => g.x === newX && g.y === newY && g.blocking)) return;
+  // todo like below, this could be a item.blocksMove() function
+  if (itemsOfType("door").some((door) => door.x === newX && door.y === newY && !door.open)) return;
 
   // reject if blocked by crate
-
   const crate = itemsOfType("crate").find((c) => c.x === newX && c.y === newY);
   const otherSideWall = shared.map[newX + x][newY + y];
   const otherSideGuest = guests.some((g) => g.x === newX + x && g.y === newY + y);
@@ -87,10 +87,10 @@ function tryMove(x, y) {
     (g) =>
       g.x === newX + x &&
       g.y === newY + y &&
-      //todo this should be handled differently.
+      // todo this should be handled differently.
       // something like g.blocksPush() which would could check if it should block
       // creates always block pushes, doors only block if closed, etc.
-      (g.blocking || g.type === "crate" || g.type === "treasure")
+      ((g.type === "door" && !g.open) || g.type === "crate" || g.type === "treasure")
   );
   const otherSideBlocked = otherSideWall || otherSideGuest || otherSideItem;
   if (crate && otherSideBlocked) return;
