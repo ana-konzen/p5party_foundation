@@ -1,6 +1,7 @@
 import { CONFIG } from "./config.js";
 import { makeId } from "./util/utilities.js";
 import { Controls } from "./util/controls.js";
+import { itemsOfType } from "./items.js";
 
 // setup controls
 const controls = new Controls();
@@ -78,19 +79,25 @@ function tryMove(x, y) {
   if (shared.items.some((g) => g.x === newX && g.y === newY && g.blocking)) return;
 
   // reject if blocked by crate
-  const crates = shared.items.filter((g) => g.type === "crate" && g.alive);
-  const c = crates.find((c) => c.x === newX && c.y === newY);
+
+  const crate = itemsOfType("crate").find((c) => c.x === newX && c.y === newY);
   const otherSideWall = shared.map[newX + x][newY + y];
   const otherSideGuest = guests.some((g) => g.x === newX + x && g.y === newY + y);
   const otherSideItem = shared.items.some(
-    (g) => g.x === newX + x && g.y === newY + y && (g.blocking || g.alive)
+    (g) =>
+      g.x === newX + x &&
+      g.y === newY + y &&
+      //todo this should be handled differently.
+      // something like g.blocksPush() which would could check if it should block
+      // creates always block pushes, doors only block if closed, etc.
+      (g.blocking || g.type === "crate" || g.type === "treasure")
   );
   const otherSideBlocked = otherSideWall || otherSideGuest || otherSideItem;
-  if (c && otherSideBlocked) return;
+  if (crate && otherSideBlocked) return;
 
   // push crate
-  if (c) {
-    partyEmit("moveCrate", { id: c.id, newX: c.x + x, newY: c.y + y });
+  if (crate) {
+    partyEmit("moveCrate", { id: crate.id, newX: crate.x + x, newY: crate.y + y });
   }
 
   // move

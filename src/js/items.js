@@ -1,15 +1,13 @@
 import { CONFIG } from "./config.js";
+import { shared } from "./host.js";
 import { makeId } from "./util/utilities.js";
 
 export function createItem(type, x, y, options = {}) {
   const defaults = {
     crate: {
-      alive: true,
       hits: 0,
     },
-    treasure: {
-      alive: true,
-    },
+    treasure: {},
     door: {
       blocking: true,
     },
@@ -41,7 +39,8 @@ export function drawItems(items) {
   // sort on copy of array to avoid mustating shared object
   const sortedItems = [...items].sort((a, b) => (a.z ?? 0) - (b.z ?? 0));
   for (const item of sortedItems) {
-    if (!item.alive && !item.blocking && item.type !== "floorSwitch") continue;
+    // don't draw open doors
+    if (item.type === "door" && !item.blocking) continue;
     drawItem(item);
   }
   pop();
@@ -99,4 +98,7 @@ export function drawItem(item) {
     item.size
   );
   pop();
+}
+export function itemsOfType(type) {
+  return shared.items.filter((g) => g.type === type);
 }

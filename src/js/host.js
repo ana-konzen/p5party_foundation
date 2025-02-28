@@ -2,7 +2,8 @@ import { generateMap } from "./map.js";
 import { makeId } from "./util/utilities.js";
 import { filterInPlace } from "./util/utilities.js";
 import { CONFIG } from "./config.js";
-let shared;
+import { itemsOfType } from "./items.js";
+export let shared;
 let guests;
 
 export function preload() {
@@ -42,7 +43,6 @@ function onShoot(data) {
     x: data.x,
     y: data.y,
     type: "bullet",
-    alive: true,
     facing: data.facing,
     color: data.color,
     id: makeId(),
@@ -55,10 +55,9 @@ export function update() {
   // check for treasure collection
   const treasures = itemsOfType("treasure");
   for (const treasure of treasures) {
-    if (!treasure.alive) continue;
     for (const guest of guests) {
       if (guest.x === treasure.x && guest.y === treasure.y) {
-        treasure.alive = false;
+        treasure.remove = true;
         shared.scores[guest.id] = (shared.scores[guest.id] ?? 0) + 1;
       }
     }
@@ -72,7 +71,7 @@ export function update() {
       (guest) => guest.x === floorSwitch.x && guest.y === floorSwitch.y
     );
     const pressedByCrate = crates.some(
-      (crate) => crate.alive && crate.x === floorSwitch.x && crate.y === floorSwitch.y
+      (crate) => crate.x === floorSwitch.x && crate.y === floorSwitch.y
     );
     const pressed = pressedByGuest || pressedByCrate;
     shared.items
@@ -89,7 +88,6 @@ export function update() {
       left: PI / 2,
       right: -PI / 2,
     };
-    if (!bullet.alive) continue;
 
     const dx = -sin(directionDict[bullet.facing]);
     const dy = cos(directionDict[bullet.facing]);
@@ -105,20 +103,20 @@ export function update() {
       shared.map[roundedX]?.[roundedY] ||
       itemsOfType("door").some((d) => d.x === roundedX && d.y === roundedY && d.blocking)
     ) {
-      bullet.alive = false;
+      bullet.remove = true;
       continue;
     }
 
     // check for collision with crates
     const maxCrateHits = 3;
-    const crate = crates.find((c) => c.x === roundedX && c.y === roundedY && c.alive);
+    const crate = crates.find((c) => c.x === roundedX && c.y === roundedY);
     if (crate) {
       crate.hits++;
       crate.alpha = map(crate.hits, 0, maxCrateHits, 255, 0);
       if (crate.hits >= maxCrateHits) {
-        crate.alive = false;
+        crate.remove = true;
       }
-      bullet.alive = false;
+      bullet.remove = true;
       continue;
     }
 
@@ -128,9 +126,5 @@ export function update() {
   }
 
   // remove dead items
-  // filterInPlace(shared.items, (item) => !item.dead);
-}
-
-function itemsOfType(type) {
-  return shared.items.filter((g) => g.type === type);
+  filterInPlace(shared.items, (item) => !item.remove);
 }
