@@ -5,6 +5,7 @@ import { changeScene, scenes } from "./main.js";
 
 import * as player from "./player.js";
 import * as host from "./host.js";
+import * as items from "./items.js";
 
 // p5.party shared objects
 // let me;
@@ -43,31 +44,30 @@ export function mousePressed() {
   changeScene(scenes.title);
 }
 
+/// draw functions
 export function draw() {
   clear();
 
-  /// draw game board
   push();
   // scroll
   translate(width * 0.5, height * 0.5);
   scale(1);
   translate(-camera.x, -camera.y);
 
-  // draw
+  // draw game
   drawGrid();
   drawMap();
-  drawItems();
+  items.drawItems(shared.items);
   drawGuests();
   pop();
 
-  /// draw overlay
+  // draw overlay
   push();
   drawScores();
   drawAmmo();
   pop();
 }
 
-/// draw functions
 function drawGrid() {
   push();
   noFill();
@@ -95,54 +95,6 @@ function drawMap() {
   }
 
   pop();
-}
-
-function drawItems() {
-  push();
-  for (const item of shared.items) {
-    if (!item.alive && !item.blocking && item.type !== "floorSwitch") continue;
-    drawItem(item);
-  }
-  pop();
-}
-
-function drawItem(item) {
-  const itemDefaults = {
-    crate: {
-      size: 56,
-      shape: "rect",
-      color: "brown",
-      alpha: 255,
-    },
-    treasure: {
-      size: 16,
-      shape: "ellipse",
-      color: "yellow",
-    },
-    door: {
-      size: 56,
-      shape: "rect",
-      color: "#335",
-    },
-    floorSwitch: {
-      size: 48,
-      shape: "ellipse",
-      color: "#335",
-    },
-  };
-
-  item = { ...itemDefaults[item.type], ...item };
-
-  ellipseMode(CORNER);
-  const itemColor = color(item.color);
-  itemColor.setAlpha(item.alpha ?? 255);
-  fill(itemColor);
-  const shape = item.shape === "rect" ? rect : ellipse;
-  shape(
-    item.x * CONFIG.grid.size + (CONFIG.grid.size / 2 - item.size / 2),
-    item.y * CONFIG.grid.size + (CONFIG.grid.size / 2 - item.size / 2),
-    item.size
-  );
 }
 
 function drawGuests() {

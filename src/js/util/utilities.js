@@ -26,7 +26,7 @@ export function removeItemFromArray(a, item) {
 }
 
 // creates a 2D array with the given dimensions and fills it with the given value
-export function array2D(cols, rows, value) {
+export function createArray2D(cols, rows, value) {
   const a = [];
   for (let col = 0; col < cols; col++) {
     a.push([]);

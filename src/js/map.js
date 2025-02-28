@@ -1,26 +1,15 @@
-import { array2D, makeId } from "./util/utilities.js";
-
-const itemDefaults = {
-  crate: {
-    alive: true,
-    hits: 0,
-    z: 1,
-  },
-  treasure: {
-    alive: true,
-    z: -1,
-  },
-  door: {
-    blocking: true,
-  },
-  floorSwitch: {
-    targets: [],
-  },
-};
+import { createArray2D } from "./util/utilities.js";
+import { createItem } from "./items.js";
 
 export function generateMap(cols, rows) {
+  function addItem(/* type, x, y, options */) {
+    const item = createItem(...arguments);
+    if (item) items.push(item);
+    return item;
+  }
+
   // init blocks
-  const map = array2D(cols, rows, false);
+  const map = createArray2D(cols, rows, false);
   const items = [];
 
   // frame the rooms
@@ -50,14 +39,11 @@ export function generateMap(cols, rows) {
     }
   }
 
-  const door1Id = makeId();
-  const door2Id = makeId();
-  const door3Id = makeId();
-  addItem("door", 8, 4, { id: door1Id });
-  addItem("door", 4, 8, { id: door2Id });
-  addItem("door", 12, 8, { id: door3Id });
-  addItem("floorSwitch", 7, 3, { targets: [door1Id, door3Id] });
-  addItem("floorSwitch", 9, 7, { targets: [door2Id] });
+  const door1 = addItem("door", 8, 4);
+  const door2 = addItem("door", 4, 8);
+  const door3 = addItem("door", 12, 8);
+  addItem("floorSwitch", 7, 3, { targets: [door1.id, door3.id] });
+  addItem("floorSwitch", 9, 7, { targets: [door2.id] });
 
   // place the crates
   for (let row = 0; row < rows - 1; row += 8) {
@@ -83,26 +69,7 @@ export function generateMap(cols, rows) {
     }
   }
 
-  // sort items by z. if z is undefined, it will be treated as 0
-  items.sort((a, b) => (a.z ?? 0) - (b.z ?? 0));
-  console.log(items);
-
   return { map, items };
-
-  function addItem(type, x, y, options = {}) {
-    if (!itemDefaults[type]) return;
-
-    const item = {
-      id: makeId(),
-      type,
-      x,
-      y,
-      ...itemDefaults[type],
-      ...options,
-    };
-
-    items.push(item);
-  }
 }
 
 function frame(map, l, t, w, h, value = true) {
