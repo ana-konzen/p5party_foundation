@@ -1,7 +1,7 @@
+import { Camera } from "./util/camera.js";
+import { iterate2D } from "./util/utilities.js";
 import { CONFIG } from "./config.js";
-import { Camera } from "./camera.js";
 import { changeScene, scenes } from "./main.js";
-import { iterate2D } from "./utilities.js";
 
 import * as player from "./player.js";
 import * as host from "./host.js";
@@ -107,6 +107,32 @@ function drawItems() {
 }
 
 function drawItem(item) {
+  const itemDefaults = {
+    crate: {
+      size: 56,
+      shape: "rect",
+      color: "brown",
+      alpha: 255,
+    },
+    treasure: {
+      size: 16,
+      shape: "ellipse",
+      color: "yellow",
+    },
+    door: {
+      size: 56,
+      shape: "rect",
+      color: "#335",
+    },
+    floorSwitch: {
+      size: 48,
+      shape: "ellipse",
+      color: "#335",
+    },
+  };
+
+  item = { ...itemDefaults[item.type], ...item };
+
   ellipseMode(CORNER);
   const itemColor = color(item.color);
   itemColor.setAlpha(item.alpha ?? 255);

@@ -1,4 +1,22 @@
-import { array2D, makeId } from "./utilities.js";
+import { array2D, makeId } from "./util/utilities.js";
+
+const itemDefaults = {
+  crate: {
+    alive: true,
+    hits: 0,
+    z: 1,
+  },
+  treasure: {
+    alive: true,
+    z: -1,
+  },
+  door: {
+    blocking: true,
+  },
+  floorSwitch: {
+    targets: [],
+  },
+};
 
 export function generateMap(cols, rows) {
   // init blocks
@@ -28,18 +46,18 @@ export function generateMap(cols, rows) {
   // place the treasure
   for (let row = 0; row < rows - 1; row += 8) {
     for (let col = 0; col < cols - 1; col += 8) {
-      addItem({ x: col + 4, y: row + 4, type: "treasure" });
+      addItem("treasure", col + 4, row + 4);
     }
   }
 
   const door1Id = makeId();
   const door2Id = makeId();
   const door3Id = makeId();
-  addItem({ x: 8, y: 4, type: "door", id: door1Id });
-  addItem({ x: 4, y: 8, type: "door", id: door2Id });
-  addItem({ x: 12, y: 8, type: "door", id: door3Id });
-  addItem({ x: 7, y: 3, type: "floorSwitch", targets: [door1Id, door3Id] });
-  addItem({ x: 9, y: 7, type: "floorSwitch", targets: [door2Id] });
+  addItem("door", 8, 4, { id: door1Id });
+  addItem("door", 4, 8, { id: door2Id });
+  addItem("door", 12, 8, { id: door3Id });
+  addItem("floorSwitch", 7, 3, { targets: [door1Id, door3Id] });
+  addItem("floorSwitch", 9, 7, { targets: [door2Id] });
 
   // place the crates
   for (let row = 0; row < rows - 1; row += 8) {
@@ -47,10 +65,10 @@ export function generateMap(cols, rows) {
       //  c
       // ctc
       //  c
-      addItem({ x: col + 3, y: row + 4, type: "crate" });
-      addItem({ x: col + 5, y: row + 4, type: "crate" });
-      addItem({ x: col + 4, y: row + 3, type: "crate" });
-      addItem({ x: col + 4, y: row + 5, type: "crate" });
+      addItem("crate", col + 3, row + 4);
+      addItem("crate", col + 5, row + 4);
+      addItem("crate", col + 4, row + 3);
+      addItem("crate", col + 4, row + 5);
 
       // scatter some more
       for (let x = 0 + 2; x < 8 - 1; x++) {
@@ -58,56 +76,33 @@ export function generateMap(cols, rows) {
           if (x === 4 && y === 4) continue;
           if (Math.random() < 0.8) continue;
           if (!items.some((c) => c.x === col + x && c.y === row + y)) {
-            addItem({ x: col + x, y: row + y, type: "crate" });
+            addItem("crate", col + x, row + y);
           }
         }
       }
     }
   }
-  function addItem({ x, y, type, id, z, hits, color, alive, blocking, targets }) {
-    const props = {
-      crate: {
-        size: 56,
-        shape: "rect",
-        hits: hits ?? 0,
-        alive: alive ?? true,
-        color: color ?? "brown",
-        alpha: 255,
-        z: z ?? 1,
-      },
-      treasure: {
-        size: 16,
-        shape: "ellipse",
-        alive: alive ?? true,
-        color: color ?? "yellow",
-        z: z ?? -1,
-      },
-      door: {
-        color: color ?? "#335",
-        size: 56,
-        shape: "rect",
-        blocking: blocking ?? true,
-      },
-      floorSwitch: {
-        color: color ?? "#335",
-        size: 48,
-        shape: "ellipse",
-        targets: targets ?? [],
-      },
-    };
-    items.push({
-      x,
-      y,
-      type,
-      id: id ?? makeId(),
-      ...props[type],
-    });
-  }
+
   // sort items by z. if z is undefined, it will be treated as 0
   items.sort((a, b) => (a.z ?? 0) - (b.z ?? 0));
   console.log(items);
 
   return { map, items };
+
+  function addItem(type, x, y, options = {}) {
+    if (!itemDefaults[type]) return;
+
+    const item = {
+      id: makeId(),
+      type,
+      x,
+      y,
+      ...itemDefaults[type],
+      ...options,
+    };
+
+    items.push(item);
+  }
 }
 
 function frame(map, l, t, w, h, value = true) {
