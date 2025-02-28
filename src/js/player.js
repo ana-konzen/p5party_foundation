@@ -1,6 +1,6 @@
 import { CONFIG } from "./config.js";
-import { makeId } from "./utilities.js";
-import { Controls } from "./controls.js";
+import { makeId } from "./util/utilities.js";
+import { Controls } from "./util/controls.js";
 
 // setup controls
 const controls = new Controls();
@@ -38,7 +38,6 @@ export function setup() {
 export function update() {
   if (controls.up.pressed) {
     tryMove(0, -1);
-    console.log(controls);
     me.facing = "up";
   }
   if (controls.down.pressed) {

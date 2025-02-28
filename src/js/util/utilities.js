@@ -1,5 +1,5 @@
 // return a random integer between in range [a, b)
-export function randomInt(a, b) {
+export function randomInt() {
   return floor(random(...arguments));
 }
 

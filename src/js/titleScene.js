@@ -1,5 +1,5 @@
 import { changeScene, scenes } from "./main.js";
-import { noiseColor } from "./utilities.js";
+import { noiseColor } from "./util/utilities.js";
 
 export function draw() {
   background("black");

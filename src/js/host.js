@@ -1,5 +1,5 @@
 import { generateMap } from "./map.js";
-import { makeId } from "./utilities.js";
+import { makeId } from "./util/utilities.js";
 
 import { CONFIG } from "./config.js";
 let shared;
