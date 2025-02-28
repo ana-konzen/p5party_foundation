@@ -25,6 +25,16 @@ export function removeItemFromArray(a, item) {
   }
 }
 
+export function filterInPlace(a, predicate) {
+  let i = a.length;
+  while (i--) {
+    if (!predicate(a[i])) {
+      console.log("removing", a[i]);
+      a.splice(i, 1);
+    }
+  }
+}
+
 // creates a 2D array with the given dimensions and fills it with the given value
 export function createArray2D(cols, rows, value) {
   const a = [];

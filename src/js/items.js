@@ -72,6 +72,11 @@ export function drawItem(item) {
       shape: "ellipse",
       color: "#335",
     },
+    bullet: {
+      size: 16,
+      color: "gray",
+      z: 2,
+    },
   };
 
   if (!defaults[item.type]) {
