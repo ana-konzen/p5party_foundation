@@ -1,10 +1,5 @@
 Todo:
-    □ keep track of what you need to do
-    ✓ I use Todo+, but you don't need even that
-    ✔ sort drawing z @started(25-02-26 17:15) @done(25-02-26 17:21) @lasted(6m7s)
-    ✔ gadget -> item @started(25-02-26 17:02) @done(25-02-26 17:05) @lasted(3m50s)
-    ✔ selectCadget -> filterItems @started(25-02-26 17:02) @done(25-02-26 17:03) @lasted(1m43s)
-    □ standardizing item properties (common) and special properties (type specific)
-    ✔ map set (y,x) -> (x,y). double check its always x,y, col,row, l,t so on. @started(25-02-26 17:08) @done(25-02-26 17:11) @lasted(3m55s)
+
+
 Template:
     

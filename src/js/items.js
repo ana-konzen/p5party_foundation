@@ -2,30 +2,114 @@ import { CONFIG } from "./config.js";
 import { shared } from "./host.js";
 import { makeId } from "./util/utilities.js";
 
-export function createItem(type, x, y, options = {}) {
-  const defaults = {
-    crate: {
-      hits: 0,
-    },
-    treasure: {},
-    door: {
-      open: false,
-    },
-    floorSwitch: {
-      targets: [],
-    },
-  };
+const itemTemplate = {
+  id: "",
+  type: "item",
+  x: 0,
+  y: 0,
+  z: 0,
+  size: 60,
+  shape: "rect",
+  color: "magenta",
+  alpha: 255,
+  draw: function () {
+    push();
+    ellipseMode(CENTER);
+    rectMode(CENTER);
+    const itemColor = color(this.color);
+    itemColor.setAlpha(this.alpha);
+    fill(itemColor);
 
-  if (!defaults[type]) {
-    throw new Error(`Could not create item of unknown type: ${type}`);
-  }
+    const shapeFunction = this.shape === "rect" ? rect : ellipse;
+    shapeFunction(
+      this.x * CONFIG.grid.size + CONFIG.grid.size / 2,
+      this.y * CONFIG.grid.size + CONFIG.grid.size / 2,
+      this.size
+    );
+    pop();
+  },
+};
+
+const crateTemplate = {
+  // ...itemTemplate,
+  type: "crate",
+  hits: 0,
+  size: 56,
+  shape: "rect",
+  color: "brown",
+  alpha: 255,
+  z: 1,
+  blocksPush: function () {
+    return true;
+  },
+};
+
+const treasureTemplate = {
+  // ...itemTemplate,
+  type: "treasure",
+  size: 16,
+  shape: "ellipse",
+  color: "yellow",
+  z: -1,
+  blocksPush: function () {
+    return true;
+  },
+};
+
+const doorTemplate = {
+  // ...itemTemplate,
+  type: "door",
+  open: false,
+  size: 56,
+  shape: "rect",
+  color: "#335",
+  blocksMove: function () {
+    return !this.open;
+  },
+  blocksPush: function () {
+    return !this.open;
+  },
+  draw: function () {
+    if (this.open) return;
+    itemTemplate.draw.call(this);
+  },
+};
+
+const floorSwitchTemplate = {
+  // ...itemTemplate,
+  type: "floorSwitch",
+  targets: [],
+  size: 48,
+  shape: "ellipse",
+  color: "#335",
+};
+
+const bulletTemplate = {
+  // ...itemTemplate,
+  type: "bullet",
+  size: 16,
+  color: "gray",
+  z: 2,
+};
+
+const templates = {
+  crate: crateTemplate,
+  treasure: treasureTemplate,
+  door: doorTemplate,
+  floorSwitch: floorSwitchTemplate,
+  bullet: bulletTemplate,
+};
+
+export function createItem(type, x, y, options = {}) {
+  // if (!templates[type]) {
+  //   throw new Error(`Could not create item of unknown type: ${type}`);
+  // }
 
   const item = {
     id: makeId(),
     type,
     x,
     y,
-    ...defaults[type],
     ...options,
   };
 
@@ -33,86 +117,35 @@ export function createItem(type, x, y, options = {}) {
 }
 
 export function blocksMove(item) {
-  if (item.type === "door") {
-    return !item.open;
-  }
-  return false;
+  item = { ...itemTemplate, ...templates[item.type], ...item };
+  // Object.setPrototypeOf(item, templates[item.type]);
+  return item.blocksMove?.() ?? false;
 }
 
 export function blocksPush(item) {
-  if (item.type === "door") return !item.open;
-  if (item.type === "crate") return true;
-  if (item.type === "treasure") return true;
-  return false;
+  item = { ...itemTemplate, ...templates[item.type], ...item };
+  return item.blocksPush?.() ?? false;
+}
+
+export function drawItem(item) {
+  item = { ...itemTemplate, ...templates[item.type], ...item };
+  item.draw();
+}
+
+export function itemsOfType(type) {
+  return shared.items.filter((g) => g.type === type);
 }
 
 export function drawItems(items) {
   push();
 
   // sort items by z. undefined zs default to 0
-  // sort on copy of array to avoid mustating shared object
+  // sort on copy of array to avoid mutating shared object
   const sortedItems = [...items].sort((a, b) => (a.z ?? 0) - (b.z ?? 0));
   for (const item of sortedItems) {
-    // don't draw open doors
-    if (item.type === "door" && item.open) continue;
+    // don't draw items flagged to remove
+    if (item.remove) continue;
     drawItem(item);
   }
   pop();
-}
-
-export function drawItem(item) {
-  const defaults = {
-    crate: {
-      size: 56,
-      shape: "rect",
-      color: "brown",
-      alpha: 255,
-      z: 1,
-    },
-    treasure: {
-      size: 16,
-      shape: "ellipse",
-      color: "yellow",
-      z: -1,
-    },
-    door: {
-      size: 56,
-      shape: "rect",
-      color: "#335",
-    },
-    floorSwitch: {
-      size: 48,
-      shape: "ellipse",
-      color: "#335",
-    },
-    bullet: {
-      size: 16,
-      color: "gray",
-      z: 2,
-    },
-  };
-
-  if (!defaults[item.type]) {
-    throw new Error(`Could not draw item of unknown type: ${item.type}`);
-  }
-
-  item = { ...defaults[item.type], ...item };
-
-  push();
-  ellipseMode(CENTER);
-  rectMode(CENTER);
-  const itemColor = color(item.color);
-  itemColor.setAlpha(item.alpha ?? 255);
-  fill(itemColor);
-
-  const shapeFunction = item.shape === "rect" ? rect : ellipse;
-  shapeFunction(
-    item.x * CONFIG.grid.size + CONFIG.grid.size / 2,
-    item.y * CONFIG.grid.size + CONFIG.grid.size / 2,
-    item.size
-  );
-  pop();
-}
-export function itemsOfType(type) {
-  return shared.items.filter((g) => g.type === type);
 }
