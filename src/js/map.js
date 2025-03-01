@@ -19,7 +19,7 @@ export function generateMap(cols, rows) {
     }
   }
 
-  // create the doors
+  // create the openings
   for (let row = 0; row < rows - 1; row += 8) {
     for (let col = 0; col < cols - 1; col += 8) {
       set(map, col + 4, row, false);
@@ -33,41 +33,45 @@ export function generateMap(cols, rows) {
   // create items
 
   // place the treasure
-  for (let row = 0; row < rows - 1; row += 8) {
-    for (let col = 0; col < cols - 1; col += 8) {
-      addItem("treasure", col + 4, row + 4);
-    }
-  }
+  // for (let row = 0; row < rows - 1; row += 8) {
+  //   for (let col = 0; col < cols - 1; col += 8) {
+  //     addItem("treasure", col + 4, row + 4);
+  //   }
+  // }
 
   const door1 = addItem("door", 8, 4);
-  const door2 = addItem("door", 4, 8);
-  const door3 = addItem("door", 12, 8);
-  addItem("floorSwitch", 7, 3, { targets: [door1.id, door3.id] });
-  addItem("floorSwitch", 9, 7, { targets: [door2.id] });
+  addItem("floorSwitch", 7, 3, { targets: [door1.id] });
+
+  addItem("crate", 5, 5);
+  addItem("crate", 5, 6);
+  addItem("treasure", 6, 5);
+
+  // const door2 = addItem("door", 4, 8);
+  // addItem("floorSwitch", 9, 7, { targets: [door2.id] });
 
   // place the crates
-  for (let row = 0; row < rows - 1; row += 8) {
-    for (let col = 0; col < cols - 1; col += 8) {
-      //  c
-      // ctc
-      //  c
-      addItem("crate", col + 3, row + 4);
-      addItem("crate", col + 5, row + 4);
-      addItem("crate", col + 4, row + 3);
-      addItem("crate", col + 4, row + 5);
+  // for (let row = 0; row < rows - 1; row += 8) {
+  //   for (let col = 0; col < cols - 1; col += 8) {
+  //     //  c
+  //     // ctc
+  //     //  c
+  //     addItem("crate", col + 3, row + 4);
+  //     addItem("crate", col + 5, row + 4);
+  //     addItem("crate", col + 4, row + 3);
+  //     addItem("crate", col + 4, row + 5);
 
-      // scatter some more
-      for (let x = 0 + 2; x < 8 - 1; x++) {
-        for (let y = 0 + 2; y < 8 - 1; y++) {
-          if (x === 4 && y === 4) continue;
-          if (Math.random() < 0.8) continue;
-          if (!items.some((c) => c.x === col + x && c.y === row + y)) {
-            addItem("crate", col + x, row + y);
-          }
-        }
-      }
-    }
-  }
+  //     // scatter some more
+  //     for (let x = 0 + 2; x < 8 - 1; x++) {
+  //       for (let y = 0 + 2; y < 8 - 1; y++) {
+  //         if (x === 4 && y === 4) continue;
+  //         if (Math.random() < 0.8) continue;
+  //         if (!items.some((c) => c.x === col + x && c.y === row + y)) {
+  //           addItem("crate", col + x, row + y);
+  //         }
+  //       }
+  //     }
+  //   }
+  // }
 
   return { map, items };
 }

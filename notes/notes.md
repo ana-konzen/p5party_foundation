@@ -4,17 +4,7 @@ Keep some notes!
 
 # Code Review
 
-current item flags:
-
-- blocking - doors @change -> door.open
-- hits - special to crates
-- targets - special to floorSwitch
-
-treasures block pushing always
-crates block pushing always and walking sometimes (based on other side)
-doors block pushing sometimes + walking sometimes (simple state)
-
-considering:
+# considering
 
 ### store items as object?
 

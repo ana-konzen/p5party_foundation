@@ -9,7 +9,7 @@ export function createItem(type, x, y, options = {}) {
     },
     treasure: {},
     door: {
-      blocking: true,
+      open: false,
     },
     floorSwitch: {
       targets: [],
@@ -30,6 +30,20 @@ export function createItem(type, x, y, options = {}) {
   };
 
   return item;
+}
+
+export function blocksMove(item) {
+  if (item.type === "door") {
+    return !item.open;
+  }
+  return false;
+}
+
+export function blocksPush(item) {
+  if (item.type === "door") return !item.open;
+  if (item.type === "crate") return true;
+  if (item.type === "treasure") return true;
+  return false;
 }
 
 export function drawItems(items) {

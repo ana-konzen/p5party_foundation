@@ -1,7 +1,7 @@
 import { CONFIG } from "./config.js";
 import { makeId } from "./util/utilities.js";
 import { Controls } from "./util/controls.js";
-import { itemsOfType } from "./items.js";
+import { itemsOfType, blocksMove, blocksPush } from "./items.js";
 
 // setup controls
 const controls = new Controls();
@@ -67,7 +67,7 @@ function tryMove(x, y) {
   const newX = me.x + x;
   const newY = me.y + y;
 
-  // reject if out of bounds
+  // reject if blocked by bounds
   if (newX < 0 || newX >= CONFIG.grid.cols || newY < 0 || newY >= CONFIG.grid.rows) {
     return;
   }
@@ -75,28 +75,28 @@ function tryMove(x, y) {
   // reject if blocked by map
   if (shared.map[newX][newY]) return;
 
-  // reject if blocked by blocking item (like doors)
-  // todo like below, this could be a item.blocksMove() function
-  if (itemsOfType("door").some((door) => door.x === newX && door.y === newY && !door.open)) return;
+  // reject if blocked by item
+  if (
+    shared.items.some((item) => {
+      return item.x === newX && item.y === newY && blocksMove(item);
+    })
+  ) {
+    return;
+  }
 
-  // reject if blocked by crate
+  // check for crate
   const crate = itemsOfType("crate").find((c) => c.x === newX && c.y === newY);
-  const otherSideWall = shared.map[newX + x][newY + y];
-  const otherSideGuest = guests.some((g) => g.x === newX + x && g.y === newY + y);
-  const otherSideItem = shared.items.some(
-    (g) =>
-      g.x === newX + x &&
-      g.y === newY + y &&
-      // todo this should be handled differently.
-      // something like g.blocksPush() which would could check if it should block
-      // creates always block pushes, doors only block if closed, etc.
-      ((g.type === "door" && !g.open) || g.type === "crate" || g.type === "treasure")
-  );
-  const otherSideBlocked = otherSideWall || otherSideGuest || otherSideItem;
-  if (crate && otherSideBlocked) return;
-
-  // push crate
   if (crate) {
+    // if crate, collect info about other side
+    const otherSideWall = shared.map[newX + x][newY + y];
+    const otherSideGuest = guests.some((g) => g.x === newX + x && g.y === newY + y);
+    const otherSideItem = shared.items.some(
+      (item) => item.x === newX + x && item.y === newY + y && blocksPush(item)
+    );
+    const otherSideBlocked = otherSideWall || otherSideGuest || otherSideItem;
+    // reject pushing blocked
+    if (crate && otherSideBlocked) return;
+    // push crate
     partyEmit("moveCrate", { id: crate.id, newX: crate.x + x, newY: crate.y + y });
   }
 
