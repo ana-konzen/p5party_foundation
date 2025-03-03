@@ -2,6 +2,7 @@ import { CONFIG } from "./config.js";
 import { Controls } from "./util/controls.js";
 import { itemsOfType, blocksMove, blocksPush } from "./items.js";
 
+import { roleKeeper } from "./playScene.js";
 // setup controls
 const controls = new Controls();
 controls.bind("ArrowUp", "up");
@@ -14,41 +15,38 @@ controls.bind("ArrowRight", "right");
 controls.bind("d", "right");
 controls.bind(" ", "shoot");
 
-let me;
-// let guests;
 let shared;
 
 export function preload() {
-  me = partyLoadMyShared();
   shared = partyLoadShared("shared");
 }
 
 export function update() {
   if (controls.up.pressed) {
-    partyEmit("face", { role: me.role_keeper.role, facing: "up" });
+    partyEmit("face", { role: roleKeeper.myRole(), facing: "up" });
     tryMove(0, -1);
   }
   if (controls.down.pressed) {
-    partyEmit("face", { role: me.role_keeper.role, facing: "down" });
+    partyEmit("face", { role: roleKeeper.myRole(), facing: "down" });
     tryMove(0, 1);
   }
   if (controls.left.pressed) {
-    partyEmit("face", { role: me.role_keeper.role, facing: "left" });
+    partyEmit("face", { role: roleKeeper.myRole(), facing: "left" });
     tryMove(-1, 0);
   }
   if (controls.right.pressed) {
-    partyEmit("face", { role: me.role_keeper.role, facing: "right" });
+    partyEmit("face", { role: roleKeeper.myRole(), facing: "right" });
     tryMove(1, 0);
   }
   if (controls.shoot.pressed) {
-    partyEmit("shoot", { role: me.role_keeper.role });
+    partyEmit("shoot", { role: roleKeeper.myRole() });
   }
 
   controls.tick();
 }
 
 function tryMove(x, y) {
-  const p = shared.players[me.role_keeper.role];
+  const p = shared.players[roleKeeper.myRole()];
   const newX = p.x + x;
   const newY = p.y + y;
 
@@ -87,5 +85,5 @@ function tryMove(x, y) {
     partyEmit("moveCrate", { id: crate.id, newX: crate.x + x, newY: crate.y + y });
   }
 
-  partyEmit("move", { role: me.role_keeper.role, newX, newY });
+  partyEmit("move", { role: roleKeeper.myRole(), newX, newY });
 }

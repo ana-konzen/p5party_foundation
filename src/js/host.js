@@ -31,26 +31,26 @@ export function setup() {
   partySubscribe("shoot", onShoot);
 }
 
-function onFace(data) {
+function onFace({ role, facing }) {
   if (!partyIsHost()) return;
-  const player = shared.players[data.role];
-  player.facing = data.facing;
+  const player = shared.players[role];
+  player.facing = facing;
 }
 
-function onMove(data) {
+function onMove({ role, newX, newY }) {
   if (!partyIsHost()) return;
-  const player = shared.players[data.role];
-  player.x = data.newX;
-  player.y = data.newY;
+  const player = shared.players[role];
+  player.x = newX;
+  player.y = newY;
 }
 
-function onMoveCrate(data) {
+function onMoveCrate({ id, newX, newY }) {
   if (!partyIsHost()) return;
   //todo don't need to filter by crate below
-  const crate = itemsOfType("crate").find((c) => c.id === data.id);
+  const crate = itemsOfType("crate").find((c) => c.id === id);
   if (!crate) return;
-  crate.x = data.newX;
-  crate.y = data.newY;
+  crate.x = newX;
+  crate.y = newY;
 }
 
 function onShoot({ role }) {
@@ -69,13 +69,17 @@ function onShoot({ role }) {
   });
 }
 
+function players() {
+  return Object.values(shared.players);
+}
+
 export function update() {
   if (!partyIsHost()) return;
 
   // check for treasure collection
   const treasures = itemsOfType("treasure");
   for (const treasure of treasures) {
-    for (const player of Object.values(shared.players)) {
+    for (const player of players()) {
       if (player.x === treasure.x && player.y === treasure.y) {
         treasure.remove = true;
         shared.scores[player.id] = (shared.scores[player.id] ?? 0) + 1;
@@ -87,7 +91,7 @@ export function update() {
   const floorSwitches = itemsOfType("floorSwitch");
   const crates = itemsOfType("crate");
   for (const floorSwitch of floorSwitches) {
-    const pressedByGuest = Object.values(shared.players).some(
+    const pressedByGuest = players().some(
       (guest) => guest.x === floorSwitch.x && guest.y === floorSwitch.y
     );
     const pressedByCrate = crates.some(

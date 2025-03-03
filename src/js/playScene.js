@@ -9,10 +9,10 @@ import * as host from "./host.js";
 import * as items from "./items.js";
 
 // p5.party shared objects
-// let me;
-let _me;
-let guests;
 let shared;
+
+// RoleKeeper - keeps clients assigned to roles (player1, player2)
+export let roleKeeper;
 
 // setup camera
 const camera = new Camera();
@@ -24,10 +24,8 @@ export function preload() {
   player.preload();
 
   shared = partyLoadShared("shared");
-  guests = partyLoadGuestShareds();
-  _me = partyLoadMyShared();
 
-  new RoleKeeper(["player1", "player2"], "unassigned");
+  roleKeeper = new RoleKeeper(["player1", "player2"], "unassigned");
 }
 
 export function setup() {
@@ -39,7 +37,7 @@ export function enter() {}
 export function update() {
   if (partyIsHost()) host.update();
   player.update();
-  const p = shared.players[_me.role_keeper.role];
+  const p = shared.players[roleKeeper.myRole()];
   camera.follow(p.x * CONFIG.grid.size, p.y * CONFIG.grid.size, 0.1);
 }
 
@@ -121,14 +119,15 @@ function drawPlayers() {
   pop();
 }
 
+// todo drawScores needs to be updated to use shared.players
 function drawScores() {
   let y = 30;
   push();
   textSize(20);
   for (const [id, score] of Object.entries(shared.scores)) {
-    const guest = guests.find((guest) => guest.id === id);
-    if (!guest) continue;
-    fill(guest.color);
+    // const guest = guests.find((guest) => guest.id === id);
+    // if (!guest) continue;
+    // fill(guest.color);
     text(score, 10, y);
     y += 20;
   }
@@ -138,7 +137,7 @@ function drawScores() {
 function drawAmmo() {
   push();
   noStroke();
-  const p = shared.players[_me.role_keeper.role];
+  const p = shared.players[roleKeeper.myRole()];
   for (let i = 0; i < p.ammo; i++) {
     fill(p.color);
     ellipse(20 + i * 20, height - 20, 16);
