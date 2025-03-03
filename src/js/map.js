@@ -46,6 +46,9 @@ export function generateMap(cols, rows) {
   addItem("crate", 6, 5);
   addItem("unknown", 1, 1);
 
+  addItem("treasure", 1, 3);
+  addItem("treasure", 1, 4);
+
   // place the crates
   // for (let row = 0; row < rows - 1; row += 8) {
   //   for (let col = 0; col < cols - 1; col += 8) {

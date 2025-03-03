@@ -1,9 +1,9 @@
 Todo:
-    □ would some refactors and helper functions make working with shared.players easier
+    ✓ would some refactors and helper functions make working with shared.players easier
       maybe tied into rolekeeper.
-      instead of using me.role_keeper.role maybe RoleKeeper.myRole()
-      instead of shared.players[me.role_keeper.role] ??
-      instead of for (player of Object.values(shared.players)) ??
+      ✓ instead of using me.role_keeper.role maybe roleKeeper.myRole()
+      x instead of shared.players[me.role_keeper.role] ??
+      ✓ instead of for (player of Object.values(shared.players)) ??
 
     
 

@@ -2,18 +2,18 @@ import { generateMap } from "./map.js";
 import { makeId } from "./util/utilities.js";
 import { filterInPlace } from "./util/utilities.js";
 import { CONFIG } from "./config.js";
-import { itemsOfType } from "./items.js";
+import { itemsOfType, blocksMove, blocksPush } from "./items.js";
+
 export let shared;
 
 export function preload() {
   // shared should be written ONLY by host
   shared = partyLoadShared("shared", {
     map: [[]], // 2D array of booleans
-    scores: {}, // object of "id: score" pairs
     items: [], // array of { x, y, type, id } objects
     players: {
-      player1: { x: 1, y: 1, color: "red", facing: "down", ammo: 10 },
-      player2: { x: 2, y: 1, color: "blue", facing: "down", ammo: 10 },
+      player1: { x: 1, y: 1, color: "red", facing: "down", ammo: 10, score: 0 },
+      player2: { x: 2, y: 1, color: "blue", facing: "down", ammo: 10, score: 0 },
     },
   });
 }
@@ -27,7 +27,6 @@ export function setup() {
 
   partySubscribe("face", onFace);
   partySubscribe("move", onMove);
-  partySubscribe("moveCrate", onMoveCrate);
   partySubscribe("shoot", onShoot);
 }
 
@@ -37,20 +36,54 @@ function onFace({ role, facing }) {
   player.facing = facing;
 }
 
-function onMove({ role, newX, newY }) {
+function onMove({ role, dX, dY }) {
   if (!partyIsHost()) return;
   const player = shared.players[role];
+
+  console.log(player, player.x, dX);
+  const newX = player.x + dX;
+  const newY = player.y + dY;
+
+  // reject if blocked by bounds
+  if (newX < 0 || newX >= CONFIG.grid.cols || newY < 0 || newY >= CONFIG.grid.rows) {
+    return;
+  }
+
+  // reject if blocked by map
+  if (shared.map[newX][newY]) return;
+
+  // reject if blocked by item
+  if (
+    shared.items.some((item) => {
+      return item.x === newX && item.y === newY && blocksMove(item);
+    })
+  ) {
+    return;
+  }
+
+  // check for crate
+  const crate = itemsOfType("crate").find((c) => c.x === newX && c.y === newY);
+  if (crate) {
+    // if crate, collect info about other side
+    const otherSideWall = shared.map[newX + dX][newY + dY];
+    const otherSideGuest = Object.values(shared.players).some(
+      (g) => g.x === newX + dX && g.y === newY + dY
+    );
+    const otherSideItem = shared.items.some(
+      (item) => item.x === newX + dX && item.y === newY + dY && blocksPush(item)
+    );
+    const otherSideBlocked = otherSideWall || otherSideGuest || otherSideItem;
+    // reject pushing blocked
+    if (crate && otherSideBlocked) return;
+
+    // push crate
+    crate.x += dX;
+    crate.y += dY;
+  }
+
+  // move the player
   player.x = newX;
   player.y = newY;
-}
-
-function onMoveCrate({ id, newX, newY }) {
-  if (!partyIsHost()) return;
-  //todo don't need to filter by crate below
-  const crate = itemsOfType("crate").find((c) => c.id === id);
-  if (!crate) return;
-  crate.x = newX;
-  crate.y = newY;
 }
 
 function onShoot({ role }) {
@@ -77,17 +110,19 @@ export function update() {
   if (!partyIsHost()) return;
 
   // check for treasure collection
+  // todo, only needs to be checked if player or treasure moves
   const treasures = itemsOfType("treasure");
   for (const treasure of treasures) {
     for (const player of players()) {
       if (player.x === treasure.x && player.y === treasure.y) {
         treasure.remove = true;
-        shared.scores[player.id] = (shared.scores[player.id] ?? 0) + 1;
+        player.score++;
       }
     }
   }
 
   // operate floor switches
+  // todo, only needs to be checked if player or crate or floor switch moves
   const floorSwitches = itemsOfType("floorSwitch");
   const crates = itemsOfType("crate");
   for (const floorSwitch of floorSwitches) {

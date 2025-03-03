@@ -21,7 +21,6 @@ export function preload() {
   partyConnect("wss://demoserver.p5party.org", "bakse-tomb");
 
   host.preload();
-  player.preload();
 
   shared = partyLoadShared("shared");
 
@@ -119,16 +118,13 @@ function drawPlayers() {
   pop();
 }
 
-// todo drawScores needs to be updated to use shared.players
 function drawScores() {
   let y = 30;
   push();
   textSize(20);
-  for (const [id, score] of Object.entries(shared.scores)) {
-    // const guest = guests.find((guest) => guest.id === id);
-    // if (!guest) continue;
-    // fill(guest.color);
-    text(score, 10, y);
+  for (const player of Object.values(shared.players)) {
+    fill(player.color);
+    text(player.score, 10, y);
     y += 20;
   }
   pop();
