@@ -1,6 +1,7 @@
-import { Camera } from "./util/camera.js";
-import { iterate2D } from "./util/utilities.js";
 import { CONFIG } from "./config.js";
+import { Camera } from "./util/camera.js";
+import { RoleKeeper } from "./RoleKeeper.js";
+import { iterate2D } from "./util/utilities.js";
 import { changeScene, scenes } from "./main.js";
 
 import * as player from "./player.js";
@@ -9,7 +10,7 @@ import * as items from "./items.js";
 
 // p5.party shared objects
 // let me;
-let me;
+let _me;
 let guests;
 let shared;
 
@@ -24,12 +25,13 @@ export function preload() {
 
   shared = partyLoadShared("shared");
   guests = partyLoadGuestShareds();
-  me = partyLoadMyShared();
+  _me = partyLoadMyShared();
+
+  new RoleKeeper(["player1", "player2"], "unassigned");
 }
 
 export function setup() {
   if (partyIsHost()) host.setup();
-  player.setup();
 }
 
 export function enter() {}
@@ -37,7 +39,8 @@ export function enter() {}
 export function update() {
   if (partyIsHost()) host.update();
   player.update();
-  camera.follow(me.x * CONFIG.grid.size, me.y * CONFIG.grid.size, 0.1);
+  const p = shared.players[_me.role_keeper.role];
+  camera.follow(p.x * CONFIG.grid.size, p.y * CONFIG.grid.size, 0.1);
 }
 
 export function mousePressed() {
@@ -58,7 +61,7 @@ export function draw() {
   drawGrid();
   drawMap();
   items.drawItems(shared.items);
-  drawGuests();
+  drawPlayers();
   pop();
 
   // draw overlay
@@ -97,7 +100,7 @@ function drawMap() {
   pop();
 }
 
-function drawGuests() {
+function drawPlayers() {
   const directionDict = {
     down: 0,
     up: PI,
@@ -105,11 +108,11 @@ function drawGuests() {
     right: -PI / 2,
   };
   push();
-  for (const guest of guests) {
+  for (const player of Object.values(shared.players)) {
     push();
-    translate(guest.x * CONFIG.grid.size + 32, guest.y * CONFIG.grid.size + 32);
-    rotate(directionDict[guest.facing]);
-    fill(guest.color);
+    translate(player.x * CONFIG.grid.size + 32, player.y * CONFIG.grid.size + 32);
+    rotate(directionDict[player.facing]);
+    fill(player.color);
     ellipse(0, 0, 64);
     fill("white");
     ellipse(0, 24, 16);
@@ -135,8 +138,9 @@ function drawScores() {
 function drawAmmo() {
   push();
   noStroke();
-  for (let i = 0; i < me.ammo; i++) {
-    fill(me.color);
+  const p = shared.players[_me.role_keeper.role];
+  for (let i = 0; i < p.ammo; i++) {
+    fill(p.color);
     ellipse(20 + i * 20, height - 20, 16);
   }
   pop();

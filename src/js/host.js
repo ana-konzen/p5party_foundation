@@ -4,7 +4,6 @@ import { filterInPlace } from "./util/utilities.js";
 import { CONFIG } from "./config.js";
 import { itemsOfType } from "./items.js";
 export let shared;
-let guests;
 
 export function preload() {
   // shared should be written ONLY by host
@@ -12,9 +11,11 @@ export function preload() {
     map: [[]], // 2D array of booleans
     scores: {}, // object of "id: score" pairs
     items: [], // array of { x, y, type, id } objects
+    players: {
+      player1: { x: 1, y: 1, color: "red", facing: "down", ammo: 10 },
+      player2: { x: 2, y: 1, color: "blue", facing: "down", ammo: 10 },
+    },
   });
-
-  guests = partyLoadGuestShareds();
 }
 
 export function setup() {
@@ -24,28 +25,47 @@ export function setup() {
   shared.map = map;
   shared.items = items;
 
+  partySubscribe("face", onFace);
+  partySubscribe("move", onMove);
   partySubscribe("moveCrate", onMoveCrate);
   partySubscribe("shoot", onShoot);
 }
 
+function onFace(data) {
+  if (!partyIsHost()) return;
+  const player = shared.players[data.role];
+  player.facing = data.facing;
+}
+
+function onMove(data) {
+  if (!partyIsHost()) return;
+  const player = shared.players[data.role];
+  player.x = data.newX;
+  player.y = data.newY;
+}
+
 function onMoveCrate(data) {
   if (!partyIsHost()) return;
+  //todo don't need to filter by crate below
   const crate = itemsOfType("crate").find((c) => c.id === data.id);
   if (!crate) return;
   crate.x = data.newX;
   crate.y = data.newY;
 }
 
-function onShoot(data) {
+function onShoot({ role }) {
   if (!partyIsHost()) return;
-  // add a bullet
+  const player = shared.players[role];
+  if (player.ammo <= 0) return;
+  player.ammo--;
+
   shared.items.push({
-    x: data.x,
-    y: data.y,
     type: "bullet",
-    facing: data.facing,
-    color: data.color,
     id: makeId(),
+    x: player.x,
+    y: player.y,
+    facing: player.facing,
+    color: player.color,
   });
 }
 
@@ -55,10 +75,10 @@ export function update() {
   // check for treasure collection
   const treasures = itemsOfType("treasure");
   for (const treasure of treasures) {
-    for (const guest of guests) {
-      if (guest.x === treasure.x && guest.y === treasure.y) {
+    for (const player of Object.values(shared.players)) {
+      if (player.x === treasure.x && player.y === treasure.y) {
         treasure.remove = true;
-        shared.scores[guest.id] = (shared.scores[guest.id] ?? 0) + 1;
+        shared.scores[player.id] = (shared.scores[player.id] ?? 0) + 1;
       }
     }
   }
@@ -67,7 +87,7 @@ export function update() {
   const floorSwitches = itemsOfType("floorSwitch");
   const crates = itemsOfType("crate");
   for (const floorSwitch of floorSwitches) {
-    const pressedByGuest = guests.some(
+    const pressedByGuest = Object.values(shared.players).some(
       (guest) => guest.x === floorSwitch.x && guest.y === floorSwitch.y
     );
     const pressedByCrate = crates.some(
