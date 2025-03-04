@@ -22,3 +22,8 @@ would also want to avoid accessing shared.items directly, in favor of itemsByTyp
 # p5.party ideas
 
 - readonly shared object refs
+
+- support for OOP. this has come up before. the test_class demo shows that using setPrototypeOf does seem to work for some situations. There are going to be some limitations. For one, no private properties. For another, it won't work for objects that store references to other objects (especially not references to things that are not (and should not be) stored). Both of these could sort of be worked around sometimes with serialize/deserialize methods for classes that are shared but then its getting complex anyway.
+- might be able to "promote" in the patchInPlace funciton of p5.party
+
+- the weakmap for local player data is okay, but i think it could be handled even better with "local unshared properties". like if p5.party didn't sync anything starting underscore .\_xyz or on .local.xyz

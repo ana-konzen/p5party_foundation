@@ -14,6 +14,7 @@
  */
 
 import * as titleScene from "./titleScene.js";
+import * as lobbyScene from "./lobbyScene.js";
 import * as playScene from "./playScene.js";
 
 let currentScene; // the scene being displayed
@@ -21,6 +22,7 @@ let currentScene; // the scene being displayed
 // all the available scenes
 export const scenes = {
   title: titleScene,
+  lobby: lobbyScene,
   play: playScene,
 };
 
@@ -38,7 +40,7 @@ window.setup = function () {
   noStroke();
 
   Object.values(scenes).forEach((scene) => scene.setup?.());
-  changeScene(scenes.play);
+  changeScene(scenes.title);
 };
 
 window.draw = function () {

@@ -33,11 +33,23 @@ export function setup() {
 
 export function enter() {}
 
+const localPlayerData = new WeakMap();
+
 export function update() {
   if (partyIsHost()) host.update();
   player.update();
-  const p = shared.players[roleKeeper.myRole()];
-  camera.follow(p.x * CONFIG.grid.size, p.y * CONFIG.grid.size, 0.1);
+  const myPlayer = shared.players[roleKeeper.myRole()];
+  camera.follow(myPlayer.x * CONFIG.grid.size, myPlayer.y * CONFIG.grid.size, 0.1);
+
+  // tween players
+  for (const player of Object.values(shared.players)) {
+    if (!localPlayerData.has(player)) {
+      localPlayerData.set(player, { x: player.x, y: player.y });
+    }
+    const localPlayer = localPlayerData.get(player);
+    localPlayer.x = lerp(localPlayer.x, player.x, 0.5);
+    localPlayer.y = lerp(localPlayer.y, player.y, 0.5);
+  }
 }
 
 export function mousePressed() {
@@ -106,8 +118,10 @@ function drawPlayers() {
   };
   push();
   for (const player of Object.values(shared.players)) {
+    const localPlayer = localPlayerData.get(player);
+
     push();
-    translate(player.x * CONFIG.grid.size + 32, player.y * CONFIG.grid.size + 32);
+    translate(localPlayer.x * CONFIG.grid.size + 32, localPlayer.y * CONFIG.grid.size + 32);
     rotate(directionDict[player.facing]);
     fill(player.color);
     ellipse(0, 0, 64);

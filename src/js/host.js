@@ -40,7 +40,6 @@ function onMove({ role, dX, dY }) {
   if (!partyIsHost()) return;
   const player = shared.players[role];
 
-  console.log(player, player.x, dX);
   const newX = player.x + dX;
   const newY = player.y + dY;
 

@@ -7,7 +7,7 @@ export function draw() {
   // draw info
   push();
   fill("white");
-  text("title scene", 10, 20);
+  text("lobby scene", 10, 20);
   pop();
 
   // draw title
@@ -15,10 +15,10 @@ export function draw() {
   fill(noiseColor(millis() / 2000));
   textSize(50);
   textAlign(CENTER, CENTER);
-  text("title", width * 0.5, height * 0.5);
+  text("lobby", width * 0.5, height * 0.5);
   pop();
 }
 
 export function mousePressed() {
-  changeScene(scenes.lobby);
+  changeScene(scenes.play);
 }
