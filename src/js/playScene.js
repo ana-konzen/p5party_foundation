@@ -36,8 +36,16 @@ const localPlayerData = new WeakMap();
 export function update() {
   if (partyIsHost()) host.update();
   player.update();
-  const myPlayer = shared.players[roleKeeper.myRole()];
-  camera.follow((myPlayer.x + 0.5) * CONFIG.grid.size, (myPlayer.y + 0.5) * CONFIG.grid.size, 0.1);
+  // const myPlayer = shared.players[roleKeeper.myRole()];
+  const x =
+    ((shared.players.player1.x + 0.5) * CONFIG.grid.size +
+      (shared.players.player2.x + 0.5) * CONFIG.grid.size) *
+    0.5;
+  const y =
+    ((shared.players.player1.y + 0.5) * CONFIG.grid.size +
+      (shared.players.player2.y + 0.5) * CONFIG.grid.size) *
+    0.5;
+  camera.follow(x, y, 0.1);
 
   // tween players
   for (const player of Object.values(shared.players)) {
