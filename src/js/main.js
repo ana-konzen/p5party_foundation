@@ -31,16 +31,19 @@ export const scenes = {
 // on the window object so p5.js can find them.
 
 window.preload = function () {
+  partyConnect("wss://demoserver.p5party.org", "bakse-tomb");
+
   Object.values(scenes).forEach((scene) => scene.preload?.());
 };
 
 window.setup = function () {
-  createCanvas(960, 540);
+  partyToggleInfo(true);
+  createCanvas(64 * 14, 64 * 10);
   noFill();
   noStroke();
 
   Object.values(scenes).forEach((scene) => scene.setup?.());
-  changeScene(scenes.title);
+  changeScene(scenes.play);
 };
 
 window.draw = function () {

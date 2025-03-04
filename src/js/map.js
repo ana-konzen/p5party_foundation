@@ -15,6 +15,7 @@ export function generateMap(cols, rows) {
   // frame the rooms
   for (let row = 0; row < rows - 1; row += 8) {
     for (let col = 0; col < cols - 1; col += 8) {
+      console.log("frame", col, row);
       frame(map, col, row, 9, 9);
     }
   }
@@ -22,7 +23,7 @@ export function generateMap(cols, rows) {
   // create the openings
   for (let row = 0; row < rows - 1; row += 8) {
     for (let col = 0; col < cols - 1; col += 8) {
-      set(map, col + 4, row, false);
+      // set(map, col + 4, row, false);
       set(map, col, row + 4, false);
     }
   }
@@ -30,6 +31,8 @@ export function generateMap(cols, rows) {
   // create outer border
   frame(map, 0, 0, cols, rows, true);
 
+  // create starting blocks
+  set(map, 1, 4, true);
   // create items
 
   // place the treasure
@@ -39,15 +42,15 @@ export function generateMap(cols, rows) {
   //   }
   // }
 
-  const door1 = addItem("door", 8, 4);
-  addItem("floorSwitch", 7, 3, { targets: [door1.id] });
+  // const door1 = addItem("door", 8, 4);
+  // addItem("floorSwitch", 7, 3, { targets: [door1.id] });
 
-  addItem("crate", 6, 4);
-  addItem("crate", 6, 5);
-  addItem("unknown", 1, 1);
+  // addItem("crate", 6, 4);
+  // addItem("crate", 6, 5);
+  // addItem("unknown", 1, 1);
 
-  addItem("treasure", 1, 3);
-  addItem("treasure", 1, 4);
+  // addItem("treasure", 1, 3);
+  // addItem("treasure", 1, 4);
 
   // place the crates
   // for (let row = 0; row < rows - 1; row += 8) {
@@ -90,6 +93,9 @@ function frame(map, l, t, w, h, value = true) {
 }
 
 function set(map, x, y, value) {
-  if (x < 0 || x >= map[0].length || y < 0 || y >= map.length) return;
-  map[y][x] = value;
+  if (x < 0 || x >= map.length || y < 0 || y >= map[0].length) {
+    console.log("reject", x, y, map);
+    return;
+  }
+  map[x][y] = value;
 }

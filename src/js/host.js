@@ -13,7 +13,7 @@ export function preload() {
     items: [], // array of { x, y, type, id } objects
     players: {
       player1: { x: 1, y: 1, color: "red", facing: "down", ammo: 10, score: 0 },
-      player2: { x: 2, y: 1, color: "blue", facing: "down", ammo: 10, score: 0 },
+      player2: { x: 1, y: 7, color: "blue", facing: "down", ammo: 10, score: 0 },
     },
   });
 }

@@ -39,8 +39,8 @@ export function filterInPlace(a, predicate) {
 export function createArray2D(cols, rows, value) {
   const a = [];
   for (let col = 0; col < cols; col++) {
-    a.push([]);
     for (let row = 0; row < rows; row++) {
+      a.push([]);
       a[col][row] = value;
     }
   }

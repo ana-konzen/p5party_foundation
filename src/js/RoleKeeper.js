@@ -14,7 +14,6 @@ export class RoleKeeper {
     this.#boundUpdate = this.#update.bind(this);
     this.#me = partyLoadMyShared(undefined, () => {
       this.#me._roleKeeper = { role: unassigned };
-
       this.#boundUpdate();
     });
   }
@@ -36,5 +35,9 @@ export class RoleKeeper {
         if (guest === this.#me) guest._roleKeeper.role = role;
       }
     });
+  }
+
+  guestsWithRole(role) {
+    return this.#guests.filter((g) => g._roleKeeper?.role === role);
   }
 }

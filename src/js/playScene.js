@@ -18,8 +18,6 @@ export let roleKeeper;
 const camera = new Camera();
 
 export function preload() {
-  partyConnect("wss://demoserver.p5party.org", "bakse-tomb");
-
   host.preload();
 
   shared = partyLoadShared("shared");
@@ -39,13 +37,15 @@ export function update() {
   if (partyIsHost()) host.update();
   player.update();
   const myPlayer = shared.players[roleKeeper.myRole()];
-  camera.follow(myPlayer.x * CONFIG.grid.size, myPlayer.y * CONFIG.grid.size, 0.1);
+  camera.follow((myPlayer.x + 0.5) * CONFIG.grid.size, (myPlayer.y + 0.5) * CONFIG.grid.size, 0.1);
 
   // tween players
   for (const player of Object.values(shared.players)) {
     if (!localPlayerData.has(player)) {
       localPlayerData.set(player, { x: player.x, y: player.y });
     }
+    Object.defineProperty(player, "local", { enumerable: false, writable: true });
+
     const localPlayer = localPlayerData.get(player);
     localPlayer.x = lerp(localPlayer.x, player.x, 0.5);
     localPlayer.y = lerp(localPlayer.y, player.y, 0.5);
@@ -53,7 +53,7 @@ export function update() {
 }
 
 export function mousePressed() {
-  changeScene(scenes.title);
+  // changeScene(scenes.title);
 }
 
 /// draw functions
