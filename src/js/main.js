@@ -16,6 +16,7 @@
 import * as titleScene from "./titleScene.js";
 import * as lobbyScene from "./lobbyScene.js";
 import * as playScene from "./playScene.js";
+import * as winScene from "./winScene.js";
 
 let currentScene; // the scene being displayed
 
@@ -24,6 +25,7 @@ export const scenes = {
   title: titleScene,
   lobby: lobbyScene,
   play: playScene,
+  win: winScene,
 };
 
 // p5.js auto detects your setup() and draw() before "installing" itself but

@@ -58,6 +58,10 @@ export function update() {
     localPlayer.x = lerp(localPlayer.x, player.x, 0.5);
     localPlayer.y = lerp(localPlayer.y, player.y, 0.5);
   }
+
+  if (shared.status === "win") {
+    changeScene(scenes.win);
+  }
 }
 
 export function mousePressed() {

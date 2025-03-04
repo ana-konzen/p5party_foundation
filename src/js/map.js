@@ -20,61 +20,37 @@ export function generateMap(cols, rows) {
     }
   }
 
-  // create the openings
-  for (let row = 0; row < rows - 1; row += 8) {
-    for (let col = 0; col < cols - 1; col += 8) {
-      // set(map, col + 4, row, false);
-      set(map, col, row + 4, false);
-    }
-  }
+  // room 1 door puzzle
+  const door1 = addItem("door", 8, 4);
+  addItem("floorSwitch", 7, 3, { targets: [door1.id] });
+  set(map, 8, 4, false);
+  addItem("crate", 9, 3);
 
-  // create outer border
-  frame(map, 0, 0, cols, rows, true);
+  // room 2-3 doors
+  set(map, 16, 2, false);
+  set(map, 16, 6, false);
 
-  // create starting blocks
-  set(map, 1, 4, true);
-  // create items
+  // room 3
+  set(map, 17, 4, true);
+  set(map, 18, 4, true);
+  addItem("crate", 19, 3);
+  addItem("crate", 19, 4);
+  addItem("crate", 19, 5);
+  set(map, 20, 2, true);
+  addItem("treasure", 20, 4);
+  set(map, 20, 6, true);
+  set(map, 21, 3, true);
+  set(map, 21, 4, true);
+  set(map, 21, 5, true);
+  set(map, 22, 4, true);
+  set(map, 23, 4, true);
 
-  // place the treasure
-  // for (let row = 0; row < rows - 1; row += 8) {
-  //   for (let col = 0; col < cols - 1; col += 8) {
-  //     addItem("treasure", col + 4, row + 4);
-  //   }
-  // }
+  // room 3-4 doors
+  set(map, 24, 2, false);
+  set(map, 24, 6, false);
 
-  // const door1 = addItem("door", 8, 4);
-  // addItem("floorSwitch", 7, 3, { targets: [door1.id] });
-
-  // addItem("crate", 6, 4);
-  // addItem("crate", 6, 5);
-  // addItem("unknown", 1, 1);
-
-  // addItem("treasure", 1, 3);
-  // addItem("treasure", 1, 4);
-
-  // place the crates
-  // for (let row = 0; row < rows - 1; row += 8) {
-  //   for (let col = 0; col < cols - 1; col += 8) {
-  //     //  c
-  //     // ctc
-  //     //  c
-  //     addItem("crate", col + 3, row + 4);
-  //     addItem("crate", col + 5, row + 4);
-  //     addItem("crate", col + 4, row + 3);
-  //     addItem("crate", col + 4, row + 5);
-
-  //     // scatter some more
-  //     for (let x = 0 + 2; x < 8 - 1; x++) {
-  //       for (let y = 0 + 2; y < 8 - 1; y++) {
-  //         if (x === 4 && y === 4) continue;
-  //         if (Math.random() < 0.8) continue;
-  //         if (!items.some((c) => c.x === col + x && c.y === row + y)) {
-  //           addItem("crate", col + x, row + y);
-  //         }
-  //       }
-  //     }
-  //   }
-  // }
+  // room 4
+  addItem("stairs", 31, 4);
 
   return { map, items };
 }

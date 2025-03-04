@@ -11,6 +11,7 @@ export function preload() {
   shared = partyLoadShared("shared", {
     map: [[]], // 2D array of booleans
     items: [], // array of { x, y, type, id } objects
+    status: "playing",
     players: {
       player1: { x: 1, y: 1, color: "red", facing: "down", ammo: 10, score: 0 },
       player2: { x: 1, y: 7, color: "blue", facing: "down", ammo: 10, score: 0 },
@@ -135,6 +136,17 @@ export function update() {
     itemsOfType("door")
       .filter((g) => floorSwitch.targets.includes(g.id))
       .forEach((door) => (door.open = pressed));
+  }
+
+  const stairs = itemsOfType("stairs");
+  // if every player is on stairs...
+  // todo only needs to be checked...
+  if (
+    players().every((player) =>
+      stairs.some((stairs) => stairs.x === player.x && stairs.y === player.y)
+    )
+  ) {
+    shared.status = "win";
   }
 
   // handle bullet movement
