@@ -52,7 +52,7 @@ export function draw() {}
 // code that handles mousePressed events
 export function mousePressed() {}
 
-// exit
+// leave
 // called from changeScene() when this scene is exited
 // code that SHOULD run every time the scene is exited
-export function exit() {}
+export function leave() {}
