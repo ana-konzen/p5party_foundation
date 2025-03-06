@@ -5,7 +5,7 @@ import { iterate2D } from "./util/utilities.js";
 import { changeScene, scenes } from "./main.js";
 
 import * as player from "./player.js";
-import * as host from "./host.js";
+
 import * as items from "./items.js";
 
 // p5.party shared objects
@@ -18,25 +18,19 @@ export let roleKeeper;
 const camera = new Camera();
 
 export function preload() {
-  host.preload();
-
   shared = partyLoadShared("shared");
-
   roleKeeper = new RoleKeeper(["player1", "player2"], "unassigned");
 }
 
-export function setup() {
-  if (partyIsHost()) host.setup();
-}
+export function setup() {}
 
 export function enter() {}
 
 const localPlayerData = new WeakMap();
 
 export function update() {
-  if (partyIsHost()) host.update();
   player.update();
-  // const myPlayer = shared.players[roleKeeper.myRole()];
+
   const x =
     ((shared.players.player1.x + 0.5) * CONFIG.grid.size +
       (shared.players.player2.x + 0.5) * CONFIG.grid.size) *
@@ -47,7 +41,9 @@ export function update() {
     0.5;
   camera.follow(x, y, 0.1);
 
-  // tween players
+  // lerp/tween players
+  // todo: when the game is reset we see the players lerp from their old final position
+  // todo need to reset localPlayerData when the game is reset
   for (const player of Object.values(shared.players)) {
     if (!localPlayerData.has(player)) {
       localPlayerData.set(player, { x: player.x, y: player.y });
@@ -129,6 +125,7 @@ function drawPlayers() {
     right: -PI / 2,
   };
   push();
+
   for (const player of Object.values(shared.players)) {
     const localPlayer = localPlayerData.get(player);
 

@@ -52,6 +52,8 @@ export function generateMap(cols, rows) {
   // room 4
   addItem("stairs", 31, 4);
 
+  addItem("stairs", 2, 4);
+
   return { map, items };
 }
 
