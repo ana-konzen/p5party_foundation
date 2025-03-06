@@ -11,7 +11,7 @@ export function preload() {
   shared = partyLoadShared("shared", {
     map: [[]], // 2D array of booleans
     items: [], // array of { x, y, type, id } objects
-    status: "playing",
+    status: "playing", // playing | win
     players: {
       player1: { x: 1, y: 1, color: "red", facing: "down", ammo: 10, score: 0 },
       player2: { x: 1, y: 7, color: "blue", facing: "down", ammo: 10, score: 0 },

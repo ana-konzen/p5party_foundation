@@ -45,7 +45,7 @@ window.setup = function () {
   noStroke();
 
   Object.values(scenes).forEach((scene) => scene.setup?.());
-  changeScene(scenes.play);
+  changeScene(scenes.title);
 };
 
 window.draw = function () {
