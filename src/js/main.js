@@ -14,14 +14,18 @@
  */
 
 import * as titleScene from "./titleScene.js";
+import * as lobbyScene from "./lobbyScene.js";
 import * as playScene from "./playScene.js";
+import * as winScene from "./winScene.js";
 
 let currentScene; // the scene being displayed
 
 // all the available scenes
 export const scenes = {
   title: titleScene,
+  lobby: lobbyScene,
   play: playScene,
+  win: winScene,
 };
 
 // p5.js auto detects your setup() and draw() before "installing" itself but
@@ -29,11 +33,14 @@ export const scenes = {
 // on the window object so p5.js can find them.
 
 window.preload = function () {
+  partyConnect("wss://demoserver.p5party.org", "bakse-tomb");
+
   Object.values(scenes).forEach((scene) => scene.preload?.());
 };
 
 window.setup = function () {
-  createCanvas(960, 540);
+  partyToggleInfo(true);
+  createCanvas(64 * 14, 64 * 10);
   noFill();
   noStroke();
 

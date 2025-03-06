@@ -1,5 +1,5 @@
 // return a random integer between in range [a, b)
-export function randomInt(a, b) {
+export function randomInt() {
   return floor(random(...arguments));
 }
 
@@ -25,12 +25,22 @@ export function removeItemFromArray(a, item) {
   }
 }
 
+export function filterInPlace(a, predicate) {
+  let i = a.length;
+  while (i--) {
+    if (!predicate(a[i])) {
+      console.log("removing", a[i]);
+      a.splice(i, 1);
+    }
+  }
+}
+
 // creates a 2D array with the given dimensions and fills it with the given value
-export function array2D(cols, rows, value) {
+export function createArray2D(cols, rows, value) {
   const a = [];
   for (let col = 0; col < cols; col++) {
-    a.push([]);
     for (let row = 0; row < rows; row++) {
+      a.push([]);
       a[col][row] = value;
     }
   }

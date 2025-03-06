@@ -1,19 +1,22 @@
 import { generateMap } from "./map.js";
-import { makeId } from "./utilities.js";
-
+import { makeId } from "./util/utilities.js";
+import { filterInPlace } from "./util/utilities.js";
 import { CONFIG } from "./config.js";
-let shared;
-let guests;
+import { itemsOfType, blocksMove, blocksPush } from "./items.js";
+
+export let shared;
 
 export function preload() {
   // shared should be written ONLY by host
   shared = partyLoadShared("shared", {
     map: [[]], // 2D array of booleans
-    scores: {}, // object of "id: score" pairs
     items: [], // array of { x, y, type, id } objects
+    status: "playing",
+    players: {
+      player1: { x: 1, y: 1, color: "red", facing: "down", ammo: 10, score: 0 },
+      player2: { x: 1, y: 7, color: "blue", facing: "down", ammo: 10, score: 0 },
+    },
   });
-
-  guests = partyLoadGuestShareds();
 }
 
 export function setup() {
@@ -23,67 +26,131 @@ export function setup() {
   shared.map = map;
   shared.items = items;
 
-  partySubscribe("moveCrate", onMoveCrate);
+  partySubscribe("face", onFace);
+  partySubscribe("move", onMove);
   partySubscribe("shoot", onShoot);
 }
 
-function onMoveCrate(data) {
+function onFace({ role, facing }) {
   if (!partyIsHost()) return;
-  const crate = filterItems("crate").find((c) => c.id === data.id);
-  if (!crate) return;
-  crate.x = data.newX;
-  crate.y = data.newY;
+  const player = shared.players[role];
+  player.facing = facing;
 }
 
-function onShoot(data) {
+function onMove({ role, dX, dY }) {
   if (!partyIsHost()) return;
-  // add a bullet
+  const player = shared.players[role];
+
+  const newX = player.x + dX;
+  const newY = player.y + dY;
+
+  // reject if blocked by bounds
+  if (newX < 0 || newX >= CONFIG.grid.cols || newY < 0 || newY >= CONFIG.grid.rows) {
+    return;
+  }
+
+  // reject if blocked by map
+  if (shared.map[newX][newY]) return;
+
+  // reject if blocked by item
+  if (
+    shared.items.some((item) => {
+      return item.x === newX && item.y === newY && blocksMove(item);
+    })
+  ) {
+    return;
+  }
+
+  // check for crate
+  const crate = itemsOfType("crate").find((c) => c.x === newX && c.y === newY);
+  if (crate) {
+    // if crate, collect info about other side
+    const otherSideWall = shared.map[newX + dX][newY + dY];
+    const otherSideGuest = Object.values(shared.players).some(
+      (g) => g.x === newX + dX && g.y === newY + dY
+    );
+    const otherSideItem = shared.items.some(
+      (item) => item.x === newX + dX && item.y === newY + dY && blocksPush(item)
+    );
+    const otherSideBlocked = otherSideWall || otherSideGuest || otherSideItem;
+    // reject pushing blocked
+    if (crate && otherSideBlocked) return;
+
+    // push crate
+    crate.x += dX;
+    crate.y += dY;
+  }
+
+  // move the player
+  player.x = newX;
+  player.y = newY;
+}
+
+function onShoot({ role }) {
+  if (!partyIsHost()) return;
+  const player = shared.players[role];
+  if (player.ammo <= 0) return;
+  player.ammo--;
+
   shared.items.push({
-    x: data.x,
-    y: data.y,
     type: "bullet",
-    size: 16,
-    alive: true,
-    color: data.color,
-    facing: data.facing,
-    z: 2,
     id: makeId(),
+    x: player.x,
+    y: player.y,
+    facing: player.facing,
+    color: player.color,
   });
+}
+
+function players() {
+  return Object.values(shared.players);
 }
 
 export function update() {
   if (!partyIsHost()) return;
 
   // check for treasure collection
-  const treasures = filterItems("treasure");
+  // todo, only needs to be checked if player or treasure moves
+  const treasures = itemsOfType("treasure");
   for (const treasure of treasures) {
-    if (!treasure.alive) continue;
-    for (const guest of guests) {
-      if (guest.x === treasure.x && guest.y === treasure.y) {
-        treasure.alive = false;
-        shared.scores[guest.id] = (shared.scores[guest.id] ?? 0) + 1;
+    for (const player of players()) {
+      if (player.x === treasure.x && player.y === treasure.y) {
+        treasure.remove = true;
+        player.score++;
       }
     }
   }
 
   // operate floor switches
-  const floorSwitches = filterItems("floorSwitch");
-  const crates = filterItems("crate");
+  // todo, only needs to be checked if player or crate or floor switch moves
+  const floorSwitches = itemsOfType("floorSwitch");
+  const crates = itemsOfType("crate");
   for (const floorSwitch of floorSwitches) {
-    const pressedByGuest = guests.some(
+    const pressedByGuest = players().some(
       (guest) => guest.x === floorSwitch.x && guest.y === floorSwitch.y
     );
     const pressedByCrate = crates.some(
-      (crate) => crate.alive && crate.x === floorSwitch.x && crate.y === floorSwitch.y
+      (crate) => crate.x === floorSwitch.x && crate.y === floorSwitch.y
     );
     const pressed = pressedByGuest || pressedByCrate;
-    shared.items
+    itemsOfType("door")
       .filter((g) => floorSwitch.targets.includes(g.id))
-      .forEach((door) => (door.blocking = !pressed));
+      .forEach((door) => (door.open = pressed));
+  }
+
+  const stairs = itemsOfType("stairs");
+  // if every player is on stairs...
+  // todo only needs to be checked...
+  if (
+    players().every((player) =>
+      stairs.some((stairs) => stairs.x === player.x && stairs.y === player.y)
+    )
+  ) {
+    shared.status = "win";
   }
 
   // handle bullet movement
-  const bullets = filterItems("bullet");
+  const bullets = itemsOfType("bullet");
   for (const bullet of bullets) {
     const directionDict = {
       down: 0,
@@ -91,7 +158,6 @@ export function update() {
       left: PI / 2,
       right: -PI / 2,
     };
-    if (!bullet.alive) continue;
 
     const dx = -sin(directionDict[bullet.facing]);
     const dy = cos(directionDict[bullet.facing]);
@@ -105,22 +171,22 @@ export function update() {
     // check for collision with walls and closed doors
     if (
       shared.map[roundedX]?.[roundedY] ||
-      filterItems("door").some((d) => d.x === roundedX && d.y === roundedY && d.blocking)
+      itemsOfType("door").some((door) => door.x === roundedX && door.y === roundedY && !door.open)
     ) {
-      bullet.alive = false;
+      bullet.remove = true;
       continue;
     }
 
     // check for collision with crates
     const maxCrateHits = 3;
-    const crate = crates.find((c) => c.x === roundedX && c.y === roundedY && c.alive);
+    const crate = crates.find((c) => c.x === roundedX && c.y === roundedY);
     if (crate) {
       crate.hits++;
       crate.alpha = map(crate.hits, 0, maxCrateHits, 255, 0);
       if (crate.hits >= maxCrateHits) {
-        crate.alive = false;
+        crate.remove = true;
       }
-      bullet.alive = false;
+      bullet.remove = true;
       continue;
     }
 
@@ -128,8 +194,7 @@ export function update() {
     bullet.x = newX;
     bullet.y = newY;
   }
-}
 
-function filterItems(type) {
-  return shared.items.filter((g) => g.type === type);
+  // remove dead items
+  filterInPlace(shared.items, (item) => !item.remove);
 }

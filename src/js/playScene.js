@@ -1,73 +1,97 @@
 import { CONFIG } from "./config.js";
-import { Camera } from "./camera.js";
+import { Camera } from "./util/camera.js";
+import { RoleKeeper } from "./RoleKeeper.js";
+import { iterate2D } from "./util/utilities.js";
 import { changeScene, scenes } from "./main.js";
-import { iterate2D } from "./utilities.js";
 
 import * as player from "./player.js";
 import * as host from "./host.js";
+import * as items from "./items.js";
 
 // p5.party shared objects
-// let me;
-let me;
-let guests;
 let shared;
+
+// RoleKeeper - keeps clients assigned to roles (player1, player2)
+export let roleKeeper;
 
 // setup camera
 const camera = new Camera();
 
 export function preload() {
-  partyConnect("wss://demoserver.p5party.org", "bakse-tomb");
-
   host.preload();
-  player.preload();
 
   shared = partyLoadShared("shared");
-  guests = partyLoadGuestShareds();
-  me = partyLoadMyShared();
+
+  roleKeeper = new RoleKeeper(["player1", "player2"], "unassigned");
 }
 
 export function setup() {
   if (partyIsHost()) host.setup();
-  player.setup();
 }
 
 export function enter() {}
 
+const localPlayerData = new WeakMap();
+
 export function update() {
   if (partyIsHost()) host.update();
   player.update();
-  camera.follow(me.x * CONFIG.grid.size, me.y * CONFIG.grid.size, 0.1);
+  // const myPlayer = shared.players[roleKeeper.myRole()];
+  const x =
+    ((shared.players.player1.x + 0.5) * CONFIG.grid.size +
+      (shared.players.player2.x + 0.5) * CONFIG.grid.size) *
+    0.5;
+  const y =
+    ((shared.players.player1.y + 0.5) * CONFIG.grid.size +
+      (shared.players.player2.y + 0.5) * CONFIG.grid.size) *
+    0.5;
+  camera.follow(x, y, 0.1);
+
+  // tween players
+  for (const player of Object.values(shared.players)) {
+    if (!localPlayerData.has(player)) {
+      localPlayerData.set(player, { x: player.x, y: player.y });
+    }
+    Object.defineProperty(player, "local", { enumerable: false, writable: true });
+
+    const localPlayer = localPlayerData.get(player);
+    localPlayer.x = lerp(localPlayer.x, player.x, 0.5);
+    localPlayer.y = lerp(localPlayer.y, player.y, 0.5);
+  }
+
+  if (shared.status === "win") {
+    changeScene(scenes.win);
+  }
 }
 
 export function mousePressed() {
-  changeScene(scenes.title);
+  // changeScene(scenes.title);
 }
 
+/// draw functions
 export function draw() {
   clear();
 
-  /// draw game board
   push();
   // scroll
   translate(width * 0.5, height * 0.5);
   scale(1);
   translate(-camera.x, -camera.y);
 
-  // draw
+  // draw game
   drawGrid();
   drawMap();
-  drawItems();
-  drawGuests();
+  items.drawItems(shared.items);
+  drawPlayers();
   pop();
 
-  /// draw overlay
+  // draw overlay
   push();
   drawScores();
   drawAmmo();
   pop();
 }
 
-/// draw functions
 function drawGrid() {
   push();
   noFill();
@@ -97,29 +121,7 @@ function drawMap() {
   pop();
 }
 
-function drawItems() {
-  push();
-  for (const item of shared.items) {
-    if (!item.alive && !item.blocking && item.type !== "floorSwitch") continue;
-    drawItem(item);
-  }
-  pop();
-}
-
-function drawItem(item) {
-  ellipseMode(CORNER);
-  const itemColor = color(item.color);
-  itemColor.setAlpha(item.alpha ?? 255);
-  fill(itemColor);
-  const shape = item.shape === "rect" ? rect : ellipse;
-  shape(
-    item.x * CONFIG.grid.size + (CONFIG.grid.size / 2 - item.size / 2),
-    item.y * CONFIG.grid.size + (CONFIG.grid.size / 2 - item.size / 2),
-    item.size
-  );
-}
-
-function drawGuests() {
+function drawPlayers() {
   const directionDict = {
     down: 0,
     up: PI,
@@ -127,11 +129,13 @@ function drawGuests() {
     right: -PI / 2,
   };
   push();
-  for (const guest of guests) {
+  for (const player of Object.values(shared.players)) {
+    const localPlayer = localPlayerData.get(player);
+
     push();
-    translate(guest.x * CONFIG.grid.size + 32, guest.y * CONFIG.grid.size + 32);
-    rotate(directionDict[guest.facing]);
-    fill(guest.color);
+    translate(localPlayer.x * CONFIG.grid.size + 32, localPlayer.y * CONFIG.grid.size + 32);
+    rotate(directionDict[player.facing]);
+    fill(player.color);
     ellipse(0, 0, 64);
     fill("white");
     ellipse(0, 24, 16);
@@ -144,11 +148,9 @@ function drawScores() {
   let y = 30;
   push();
   textSize(20);
-  for (const [id, score] of Object.entries(shared.scores)) {
-    const guest = guests.find((guest) => guest.id === id);
-    if (!guest) continue;
-    fill(guest.color);
-    text(score, 10, y);
+  for (const player of Object.values(shared.players)) {
+    fill(player.color);
+    text(player.score, 10, y);
     y += 20;
   }
   pop();
@@ -157,8 +159,9 @@ function drawScores() {
 function drawAmmo() {
   push();
   noStroke();
-  for (let i = 0; i < me.ammo; i++) {
-    fill(me.color);
+  const p = shared.players[roleKeeper.myRole()];
+  for (let i = 0; i < p.ammo; i++) {
+    fill(p.color);
     ellipse(20 + i * 20, height - 20, 16);
   }
   pop();
