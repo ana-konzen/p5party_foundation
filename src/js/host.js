@@ -11,24 +11,32 @@ export function preload() {
   shared = partyLoadShared("shared", {
     map: [[]], // 2D array of booleans
     items: [], // array of { x, y, type, id } objects
-    status: "playing",
+    //todo DRY this (look at startPlaying)
     players: {
-      player1: { x: 1, y: 1, color: "red", facing: "down", ammo: 10, score: 0 },
-      player2: { x: 1, y: 7, color: "blue", facing: "down", ammo: 10, score: 0 },
+      player1: { x: 1, y: 1, color: "red", facing: "down", ammo: 10, score: 0, ready: false },
+      player2: { x: 1, y: 7, color: "blue", facing: "down", ammo: 10, score: 0, ready: false },
     },
+    // todo change name of status. gameState?
+    status: "waiting", // waiting | playing | win
   });
 }
 
 export function setup() {
   if (!partyIsHost()) return;
-  const { map, items } = generateMap(CONFIG.grid.cols, CONFIG.grid.rows);
 
-  shared.map = map;
-  shared.items = items;
-
+  partySubscribe("setReady", onSetReady);
   partySubscribe("face", onFace);
   partySubscribe("move", onMove);
   partySubscribe("shoot", onShoot);
+}
+
+function onSetReady({ role, ready }) {
+  if (!partyIsHost()) return;
+  console.log("onSetReady", role, ready);
+  shared.players[role].ready = ready;
+
+  const allReady = Object.values(shared.players).every((player) => player.ready);
+  if (allReady) startPlaying();
 }
 
 function onFace({ role, facing }) {
@@ -102,6 +110,30 @@ function onShoot({ role }) {
   });
 }
 
+function startPlaying() {
+  const { map, items } = generateMap(CONFIG.grid.cols, CONFIG.grid.rows);
+  shared.map = map;
+  shared.items = items;
+  shared.players = {
+    player1: { x: 1, y: 1, color: "red", facing: "down", ammo: 10, score: 0, ready: true },
+    player2: { x: 1, y: 7, color: "blue", facing: "down", ammo: 10, score: 0, ready: true },
+  };
+  shared.status = "playing";
+}
+
+function startWin() {
+  shared.status = "win";
+
+  // todo: this won't hand off if host leaves during timeout
+  setTimeout(startWaiting, 5000);
+}
+
+function startWaiting() {
+  shared.players.player1.ready = false;
+  shared.players.player2.ready = false;
+  shared.status = "waiting";
+}
+
 function players() {
   return Object.values(shared.players);
 }
@@ -141,12 +173,15 @@ export function update() {
   const stairs = itemsOfType("stairs");
   // if every player is on stairs...
   // todo only needs to be checked...
+  // todo the is playing check should be higher level
+  // update should dispatch to different updates based on status
   if (
+    shared.status === "playing" &&
     players().every((player) =>
       stairs.some((stairs) => stairs.x === player.x && stairs.y === player.y)
     )
   ) {
-    shared.status = "win";
+    startWin();
   }
 
   // handle bullet movement

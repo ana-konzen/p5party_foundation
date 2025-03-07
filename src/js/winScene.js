@@ -5,6 +5,12 @@ let shared;
 export function preload() {
   shared = partyLoadShared("shared");
 }
+
+export function update() {
+  if (shared.status === "waiting") {
+    changeScene(scenes.title);
+  }
+}
 export function draw() {
   background("black");
 

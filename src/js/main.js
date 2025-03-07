@@ -18,6 +18,8 @@ import * as lobbyScene from "./lobbyScene.js";
 import * as playScene from "./playScene.js";
 import * as winScene from "./winScene.js";
 
+import * as host from "./host.js";
+
 let currentScene; // the scene being displayed
 
 // all the available scenes
@@ -35,23 +37,32 @@ export const scenes = {
 window.preload = function () {
   partyConnect("wss://demoserver.p5party.org", "bakse-tomb");
 
+  // todo,
+  host.preload();
   Object.values(scenes).forEach((scene) => scene.preload?.());
 };
 
 window.setup = function () {
+  if (partyIsHost()) host.setup();
   partyToggleInfo(true);
   createCanvas(64 * 14, 64 * 10);
   noFill();
   noStroke();
 
   Object.values(scenes).forEach((scene) => scene.setup?.());
-  changeScene(scenes.play);
+  changeScene(scenes.title);
 };
 
 window.draw = function () {
+  if (partyIsHost()) host.update();
+
   // call update() and draw() on the current scene
   // (if the scene exists and has those functions)
+  const previousScene = currentScene;
   currentScene?.update?.();
+  // if the scene changed in update don't draw
+  // otherwise draw could get called on a scene that hasn't updated yet
+  if (previousScene !== currentScene) return;
   currentScene?.draw?.();
 };
 
