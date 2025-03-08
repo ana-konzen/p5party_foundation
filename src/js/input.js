@@ -12,6 +12,9 @@ controls.bind("ArrowRight", "right");
 controls.bind("d", "right");
 controls.bind(" ", "shoot");
 
+export function reset() {
+  controls.tick();
+}
 export function update() {
   if (controls.up.pressed) {
     partyEmit("face", { role: roleKeeper.myRole(), facing: "up" });

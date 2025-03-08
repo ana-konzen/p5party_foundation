@@ -1,22 +1,14 @@
 import { CONFIG } from "./config.js";
 import { Camera } from "./util/camera.js";
-import { RoleKeeper } from "./RoleKeeper.js";
+import { RoleKeeper } from "./util/RoleKeeper.js";
 import { iterate2D } from "./util/utilities.js";
 import { changeScene, scenes } from "./main.js";
-
-import * as player from "./player.js";
-
+import * as input from "./input.js";
 import * as items from "./items.js";
 
-// p5.party shared objects
-let shared;
-
-// RoleKeeper - keeps clients assigned to roles (player1, player2)
 export let roleKeeper;
-
-// setup camera
+let shared;
 const camera = new Camera();
-
 export function preload() {
   shared = partyLoadShared("shared");
   roleKeeper = new RoleKeeper(["player1", "player2"], "unassigned");
@@ -24,45 +16,49 @@ export function preload() {
 
 export function setup() {}
 
-export function enter() {}
+export function enter() {
+  for (const player of Object.values(shared.players)) {
+    localPlayer(player).x = player.x;
+    localPlayer(player).y = player.y;
+  }
+  camera.follow(...aimCamera(), 1);
+  input.reset();
+}
 
-const localPlayerData = new WeakMap();
-
-export function update() {
-  player.update();
-
-  const x =
+function aimCamera() {
+  const cameraX =
     ((shared.players.player1.x + 0.5) * CONFIG.grid.size +
       (shared.players.player2.x + 0.5) * CONFIG.grid.size) *
     0.5;
-  const y =
+  const cameraY =
     ((shared.players.player1.y + 0.5) * CONFIG.grid.size +
       (shared.players.player2.y + 0.5) * CONFIG.grid.size) *
     0.5;
-  camera.follow(x, y, 0.1);
+
+  return [cameraX, cameraY];
+}
+export function update() {
+  // sync scene to gameState
+  if (shared.gameState === "win") {
+    changeScene(scenes.win);
+    return;
+  }
+  if (shared.gameState === "waiting") {
+    changeScene(scenes.title);
+    return;
+  }
+
+  input.update();
 
   // lerp/tween players
-  // todo: when the game is reset we see the players lerp from their old final position
-  // todo need to reset localPlayerData when the game is reset
   for (const player of Object.values(shared.players)) {
-    if (!localPlayerData.has(player)) {
-      localPlayerData.set(player, { x: player.x, y: player.y });
-    }
-    Object.defineProperty(player, "local", { enumerable: false, writable: true });
-
-    const localPlayer = localPlayerData.get(player);
-    localPlayer.x = lerp(localPlayer.x, player.x, 0.5);
-    localPlayer.y = lerp(localPlayer.y, player.y, 0.5);
+    localPlayer(player).x = lerp(localPlayer(player).x, player.x, 0.5);
+    localPlayer(player).y = lerp(localPlayer(player).y, player.y, 0.5);
   }
-
-  if (shared.status === "win") {
-    changeScene(scenes.win);
-  }
+  camera.follow(...aimCamera(), 0.1);
 }
 
-export function mousePressed() {
-  // changeScene(scenes.title);
-}
+export function mousePressed() {}
 
 /// draw functions
 export function draw() {
@@ -127,10 +123,11 @@ function drawPlayers() {
   push();
 
   for (const player of Object.values(shared.players)) {
-    const localPlayer = localPlayerData.get(player);
-
     push();
-    translate(localPlayer.x * CONFIG.grid.size + 32, localPlayer.y * CONFIG.grid.size + 32);
+    translate(
+      localPlayer(player).x * CONFIG.grid.size + 32,
+      localPlayer(player).y * CONFIG.grid.size + 32
+    );
     rotate(directionDict[player.facing]);
     fill(player.color);
     ellipse(0, 0, 64);
@@ -162,4 +159,12 @@ function drawAmmo() {
     ellipse(20 + i * 20, height - 20, 16);
   }
   pop();
+}
+
+function localPlayer(player) {
+  if (!localPlayer.data) localPlayer.data = new WeakMap();
+  if (!localPlayer.data.has(player)) {
+    localPlayer.data.set(player, { x: player.x, y: player.y });
+  }
+  return localPlayer.data.get(player);
 }

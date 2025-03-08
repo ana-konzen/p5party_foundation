@@ -8,7 +8,7 @@ export function preload() {
 }
 
 export function update() {
-  if (shared.status === "playing") {
+  if (shared.gameState === "playing") {
     changeScene(scenes.play);
   }
 }
@@ -46,22 +46,6 @@ export function draw() {
     textSize(20);
     text(shared.players.player2.ready ? "ready" : "waiting", width * 0.75, height * 0.7);
   }
-
-  // if (
-  //   player1 &&
-  //   player2 &&
-  //   shared.player(player1.status === "ready" || player1.status === "playing") &&
-  //   (player2.status === "ready" || player2.status === "playing")
-  // ) {
-  //   countDown--;
-  //   textSize(100);
-  //   text(Math.floor(countDown / 60), width * 0.5, height * 0.75);
-  //   if (countDown === 0) {
-  //     changeScene(scenes.play);
-  //   }
-  // } else {
-  //   countDown = 180;
-  // }
 
   pop();
 }

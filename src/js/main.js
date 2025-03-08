@@ -37,7 +37,6 @@ export const scenes = {
 window.preload = function () {
   partyConnect("wss://demoserver.p5party.org", "bakse-tomb");
 
-  // todo,
   host.preload();
   Object.values(scenes).forEach((scene) => scene.preload?.());
 };
@@ -54,6 +53,7 @@ window.setup = function () {
 };
 
 window.draw = function () {
+  // todo update on set interval
   if (partyIsHost()) host.update();
 
   // call update() and draw() on the current scene

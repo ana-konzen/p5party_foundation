@@ -11,13 +11,20 @@ export function preload() {
   shared = partyLoadShared("shared", {
     map: [[]], // 2D array of booleans
     items: [], // array of { x, y, type, id } objects
-    //todo DRY this (look at startPlaying)
     players: {
-      player1: { x: 1, y: 1, color: "red", facing: "down", ammo: 10, score: 0, ready: false },
-      player2: { x: 1, y: 7, color: "blue", facing: "down", ammo: 10, score: 0, ready: false },
+      player1: {
+        x: 0, // grid position
+        y: 0, // grid position
+        color: "black", // tint color
+        facing: "up", // up | down | left | right
+        ammo: 0, // number of bullets
+        score: 0, // number of treasures collected
+        ready: false, // ready to start
+      },
+      player2: { x: 0, y: 0, color: "black", facing: "up", ammo: 0, score: 0, ready: false },
     },
-    // todo change name of status. gameState?
-    status: "waiting", // waiting | playing | win
+
+    gameState: "waiting", // waiting | playing | win
   });
 }
 
@@ -32,6 +39,7 @@ export function setup() {
 
 function onSetReady({ role, ready }) {
   if (!partyIsHost()) return;
+  if (shared.gameState !== "waiting") return;
   console.log("onSetReady", role, ready);
   shared.players[role].ready = ready;
 
@@ -41,12 +49,15 @@ function onSetReady({ role, ready }) {
 
 function onFace({ role, facing }) {
   if (!partyIsHost()) return;
+  if (shared.gameState !== "playing") return;
   const player = shared.players[role];
   player.facing = facing;
 }
 
 function onMove({ role, dX, dY }) {
   if (!partyIsHost()) return;
+  if (shared.gameState !== "playing") return;
+  console.log("onMove", role, dX, dY);
   const player = shared.players[role];
 
   const newX = player.x + dX;
@@ -96,6 +107,8 @@ function onMove({ role, dX, dY }) {
 
 function onShoot({ role }) {
   if (!partyIsHost()) return;
+  if (shared.gameState !== "playing") return;
+
   const player = shared.players[role];
   if (player.ammo <= 0) return;
   player.ammo--;
@@ -111,6 +124,9 @@ function onShoot({ role }) {
 }
 
 function startPlaying() {
+  if (shared.gameState !== "waiting") {
+    throw new Error(`Invalid game state transition: ${shared.gameState} -> playing`);
+  }
   const { map, items } = generateMap(CONFIG.grid.cols, CONFIG.grid.rows);
   shared.map = map;
   shared.items = items;
@@ -118,20 +134,27 @@ function startPlaying() {
     player1: { x: 1, y: 1, color: "red", facing: "down", ammo: 10, score: 0, ready: true },
     player2: { x: 1, y: 7, color: "blue", facing: "down", ammo: 10, score: 0, ready: true },
   };
-  shared.status = "playing";
+  shared.players.player1.ready = false;
+  shared.players.player2.ready = false;
+  shared.gameState = "playing";
 }
 
 function startWin() {
-  shared.status = "win";
+  if (shared.gameState !== "playing") {
+    throw new Error(`Invalid game state transition: ${shared.gameState} -> win`);
+  }
+  shared.gameState = "win";
 
-  // todo: this won't hand off if host leaves during timeout
+  // warn: this won't hand off if host leaves during timeout
   setTimeout(startWaiting, 5000);
 }
 
 function startWaiting() {
-  shared.players.player1.ready = false;
-  shared.players.player2.ready = false;
-  shared.status = "waiting";
+  if (shared.gameState !== "win") {
+    throw new Error(`Invalid game state transition: ${shared.gameState} -> waiting`);
+  }
+
+  shared.gameState = "waiting";
 }
 
 function players() {
@@ -141,8 +164,13 @@ function players() {
 export function update() {
   if (!partyIsHost()) return;
 
+  if (shared.gameState === "waiting") return;
+  if (shared.gameState === "win") return;
+  if (shared.gameState === "playing") updatePlaying();
+}
+
+function updatePlaying() {
   // check for treasure collection
-  // todo, only needs to be checked if player or treasure moves
   const treasures = itemsOfType("treasure");
   for (const treasure of treasures) {
     for (const player of players()) {
@@ -154,7 +182,6 @@ export function update() {
   }
 
   // operate floor switches
-  // todo, only needs to be checked if player or crate or floor switch moves
   const floorSwitches = itemsOfType("floorSwitch");
   const crates = itemsOfType("crate");
   for (const floorSwitch of floorSwitches) {
@@ -171,12 +198,10 @@ export function update() {
   }
 
   const stairs = itemsOfType("stairs");
-  // if every player is on stairs...
-  // todo only needs to be checked...
-  // todo the is playing check should be higher level
-  // update should dispatch to different updates based on status
+
+  // if every player is on stairs, goto win state
   if (
-    shared.status === "playing" &&
+    shared.gameState === "playing" &&
     players().every((player) =>
       stairs.some((stairs) => stairs.x === player.x && stairs.y === player.y)
     )
@@ -184,7 +209,7 @@ export function update() {
     startWin();
   }
 
-  // handle bullet movement
+  // bullet - handle bullet movement
   const bullets = itemsOfType("bullet");
   for (const bullet of bullets) {
     const directionDict = {
@@ -212,7 +237,7 @@ export function update() {
       continue;
     }
 
-    // check for collision with crates
+    // bullet - check for collision with crates
     const maxCrateHits = 3;
     const crate = crates.find((c) => c.x === roundedX && c.y === roundedY);
     if (crate) {
@@ -225,7 +250,7 @@ export function update() {
       continue;
     }
 
-    // move the bullet
+    // bullet - move the bullet
     bullet.x = newX;
     bullet.y = newY;
   }
