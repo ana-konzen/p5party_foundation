@@ -40,7 +40,7 @@ export function setup() {
 function onSetReady({ role, ready }) {
   if (!partyIsHost()) return;
   if (shared.gameState !== "waiting") return;
-  console.log("onSetReady", role, ready);
+
   shared.players[role].ready = ready;
 
   const allReady = Object.values(shared.players).every((player) => player.ready);
@@ -128,6 +128,7 @@ function startPlaying() {
     throw new Error(`Invalid game state transition: ${shared.gameState} -> playing`);
   }
   const { map, items } = generateMap(CONFIG.grid.cols, CONFIG.grid.rows);
+
   shared.map = map;
   shared.items = items;
   shared.players = {

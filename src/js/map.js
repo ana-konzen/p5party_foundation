@@ -10,12 +10,12 @@ export function generateMap(cols, rows) {
 
   // init blocks
   const map = createArray2D(cols, rows, false);
+
   const items = [];
 
   // frame the rooms
   for (let row = 0; row < rows - 1; row += 8) {
     for (let col = 0; col < cols - 1; col += 8) {
-      console.log("frame", col, row);
       frame(map, col, row, 9, 9);
     }
   }
@@ -51,7 +51,6 @@ export function generateMap(cols, rows) {
 
   // room 4
   addItem("stairs", 31, 4);
-
   addItem("stairs", 2, 4);
 
   return { map, items };

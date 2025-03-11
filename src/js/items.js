@@ -12,6 +12,7 @@ const itemTemplate = {
   shape: "rect",
   color: "magenta",
   alpha: 255,
+  emoji: "⁉️",
   draw: function () {
     push();
     ellipseMode(CENTER);
@@ -39,6 +40,7 @@ const crateTemplate = {
   color: "brown",
   alpha: 255,
   z: 1,
+  emoji: "📦",
   blocksPush: function () {
     return true;
   },
@@ -51,6 +53,7 @@ const treasureTemplate = {
   shape: "ellipse",
   color: "yellow",
   z: -1,
+  emoji: "💰",
   blocksPush: function () {
     return true;
   },
@@ -63,6 +66,7 @@ const doorTemplate = {
   size: 56,
   shape: "rect",
   color: "#335",
+  emoji: "🚪",
   blocksMove: function () {
     return !this.open;
   },
@@ -82,6 +86,14 @@ const floorSwitchTemplate = {
   size: 48,
   shape: "ellipse",
   color: "#335",
+  emoji: "🔘",
+};
+
+const stairsTemplate = {
+  // ...itemTemplate,
+  type: "stairs",
+  size: 48,
+  emoji: "⬆️",
 };
 
 const bulletTemplate = {
@@ -89,6 +101,7 @@ const bulletTemplate = {
   type: "bullet",
   size: 16,
   color: "gray",
+  emoji: false,
   z: 2,
 };
 
@@ -98,13 +111,10 @@ const templates = {
   door: doorTemplate,
   floorSwitch: floorSwitchTemplate,
   bullet: bulletTemplate,
+  stairs: stairsTemplate,
 };
 
 export function createItem(type, x, y, options = {}) {
-  // if (!templates[type]) {
-  //   throw new Error(`Could not create item of unknown type: ${type}`);
-  // }
-
   const item = {
     id: makeId(),
     type,
@@ -116,6 +126,9 @@ export function createItem(type, x, y, options = {}) {
   return item;
 }
 
+export function expand(item) {
+  return { ...itemTemplate, ...templates[item.type], ...item };
+}
 export function blocksMove(item) {
   item = { ...itemTemplate, ...templates[item.type], ...item };
   // Object.setPrototypeOf(item, templates[item.type]);
