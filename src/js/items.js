@@ -32,7 +32,6 @@ const itemTemplate = {
 };
 
 const crateTemplate = {
-  // ...itemTemplate,
   type: "crate",
   hits: 0,
   size: 56,
@@ -46,8 +45,24 @@ const crateTemplate = {
   },
 };
 
+const waterTemplate = {
+  type: "water",
+  hits: 0,
+  size: 56,
+  shape: "rect",
+  color: "blue",
+  alpha: 255,
+  z: 1,
+  mapSymbol: "≈",
+  blocksMove: function () {
+    return true;
+  },
+  blocksPush: function () {
+    return true;
+  },
+};
+
 const treasureTemplate = {
-  // ...itemTemplate,
   type: "treasure",
   size: 16,
   shape: "ellipse",
@@ -60,7 +75,6 @@ const treasureTemplate = {
 };
 
 const doorTemplate = {
-  // ...itemTemplate,
   type: "door",
   open: false,
   group: "",
@@ -84,7 +98,6 @@ const doorTemplate = {
 };
 
 const floorSwitchTemplate = {
-  // ...itemTemplate,
   type: "floorSwitch",
   group: "",
   size: 48,
@@ -97,14 +110,12 @@ const floorSwitchTemplate = {
 };
 
 const stairsTemplate = {
-  // ...itemTemplate,
   type: "stairs",
   size: 48,
   mapSymbol: "↑",
 };
 
 const bulletTemplate = {
-  // ...itemTemplate,
   type: "bullet",
   size: 16,
   color: "gray",
@@ -119,6 +130,7 @@ const templates = {
   floorSwitch: floorSwitchTemplate,
   bullet: bulletTemplate,
   stairs: stairsTemplate,
+  water: waterTemplate,
 };
 
 export function typeForSymbol(symbol) {
