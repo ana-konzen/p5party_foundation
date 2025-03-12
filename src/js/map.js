@@ -1,5 +1,6 @@
 import { createArray2D } from "./util/utilities.js";
-import { createItem } from "./items.js";
+import { createItem, expand } from "./items.js";
+import { iterate2D, transpose2D } from "./util/utilities.js";
 
 export function generateMap(cols, rows) {
   function addItem(/* type, x, y, options */) {
@@ -75,4 +76,29 @@ function set(map, x, y, value) {
     return;
   }
   map[x][y] = value;
+}
+
+export function exportMap(map = [[]], items = []) {
+  // deep copy map
+  map = map.map((row) => [...row]);
+
+  // place the walls and voids
+  for (const [x, y, value] of iterate2D(map)) {
+    map[x][y] = value ? "▧" : " ";
+  }
+
+  // place the items
+  for (const item of items) {
+    const { x, y, mapSymbol } = expand(item);
+    if (x < 0 || x >= map.length || y < 0 || y >= map[0].length) continue;
+    if (!mapSymbol) continue;
+    map[x][y] = mapSymbol;
+  }
+
+  // turn into string
+  const mapYX = transpose2D(map);
+  const result = mapYX.map((row) => row.join("")).join("\n");
+
+  // display string
+  return result;
 }

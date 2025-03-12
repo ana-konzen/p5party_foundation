@@ -3,6 +3,7 @@ import { Camera } from "./util/camera.js";
 import { RoleKeeper } from "./util/RoleKeeper.js";
 import { iterate2D, transpose2D } from "./util/utilities.js";
 import { changeScene, scenes } from "./main.js";
+import { exportMap } from "./map.js";
 import * as input from "./input.js";
 import * as items from "./items.js";
 
@@ -31,32 +32,8 @@ export function enter() {
   }
   camera.follow(...aimCamera(), 1);
   input.reset();
-  exportMap();
-}
 
-function exportMap() {
-  // deep copy shared.map
-  const map = shared.map.map((row) => [...row]);
-
-  // place the walls and voids
-  for (const [x, y, value] of iterate2D(shared.map)) {
-    map[x][y] = value ? "🟨" : "⬛";
-  }
-
-  // place the items
-  for (const item of shared.items) {
-    const { x, y, emoji } = items.expand(item);
-    if (x < 0 || x >= CONFIG.grid.cols || y < 0 || y >= CONFIG.grid.rows) continue;
-    if (!emoji) continue;
-    map[x][y] = emoji;
-  }
-
-  // turn into string
-  const mapYX = transpose2D(map);
-  const result = mapYX.map((row) => row.join("")).join("\n");
-
-  // display string
-  mapDataDiv.innerHTML = result;
+  mapDataDiv.innerHTML = exportMap(shared.map, shared.items);
 }
 
 function aimCamera() {

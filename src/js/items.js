@@ -12,7 +12,7 @@ const itemTemplate = {
   shape: "rect",
   color: "magenta",
   alpha: 255,
-  emoji: "⁉️",
+  mapSymbol: "?",
   draw: function () {
     push();
     ellipseMode(CENTER);
@@ -40,7 +40,7 @@ const crateTemplate = {
   color: "brown",
   alpha: 255,
   z: 1,
-  emoji: "📦",
+  mapSymbol: "▢",
   blocksPush: function () {
     return true;
   },
@@ -53,7 +53,7 @@ const treasureTemplate = {
   shape: "ellipse",
   color: "yellow",
   z: -1,
-  emoji: "💰",
+  mapSymbol: "$",
   blocksPush: function () {
     return true;
   },
@@ -66,7 +66,7 @@ const doorTemplate = {
   size: 56,
   shape: "rect",
   color: "#335",
-  emoji: "🚪",
+  mapSymbol: "¶",
   blocksMove: function () {
     return !this.open;
   },
@@ -86,14 +86,14 @@ const floorSwitchTemplate = {
   size: 48,
   shape: "ellipse",
   color: "#335",
-  emoji: "🔘",
+  mapSymbol: "◉",
 };
 
 const stairsTemplate = {
   // ...itemTemplate,
   type: "stairs",
   size: 48,
-  emoji: "⬆️",
+  mapSymbol: "↑",
 };
 
 const bulletTemplate = {
@@ -101,7 +101,7 @@ const bulletTemplate = {
   type: "bullet",
   size: 16,
   color: "gray",
-  emoji: false,
+  mapSymbol: false,
   z: 2,
 };
 
