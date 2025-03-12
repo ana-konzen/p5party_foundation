@@ -50,7 +50,7 @@ const waterTemplate = {
   hits: 0,
   size: 56,
   shape: "rect",
-  color: "blue",
+  color: "#006",
   alpha: 255,
   z: 1,
   mapSymbol: "≈",
