@@ -1,6 +1,18 @@
 import { createArray2D } from "./util/utilities.js";
-import { createItem, expand } from "./items.js";
+import { createItem, expand, typeForSymbol } from "./items.js";
 import { iterate2D, transpose2D } from "./util/utilities.js";
+
+export const mainMap = `
+#################################
+#       #       #       #       #
+#       #       B   #           #
+#1     a#▢      #  ▢ #  #       #
+# ↑     A      b###▢$####      ↑#
+#2      #       #  ▢ #  #       #
+#       #       B       #       #
+#       #       #       #       #
+#################################
+`.trim();
 
 export function generateMap(cols, rows) {
   function addItem(/* type, x, y, options */) {
@@ -84,7 +96,7 @@ export function exportMap(map = [[]], items = []) {
 
   // place the walls and voids
   for (const [x, y, value] of iterate2D(map)) {
-    map[x][y] = value ? "▧" : " ";
+    map[x][y] = value ? "#" : " ";
   }
 
   // place the items
@@ -92,7 +104,9 @@ export function exportMap(map = [[]], items = []) {
     const { x, y, mapSymbol } = expand(item);
     if (x < 0 || x >= map.length || y < 0 || y >= map[0].length) continue;
     if (!mapSymbol) continue;
-    map[x][y] = mapSymbol;
+    // if map symbol is a function call it, otherwise use it as is
+    console.log("item", item);
+    map[x][y] = typeof mapSymbol === "function" ? mapSymbol.call(item) : mapSymbol;
   }
 
   // turn into string
@@ -101,4 +115,39 @@ export function exportMap(map = [[]], items = []) {
 
   // display string
   return result;
+}
+
+export function loadMap(mapString = mainMap) {
+  const map = transpose2D(mapString.split("\n").map((row) => row.split("")));
+
+  const items = [];
+  const p1 = {};
+  const p2 = {};
+
+  for (const [x, y, value] of iterate2D(map)) {
+    map[x][y] = value === "#" ? true : false;
+    const itemType = typeForSymbol(value);
+    if (itemType) {
+      items.push(createItem(itemType, x, y));
+    }
+    // lowercase letters are floorSwitches
+    if (value.match(/[a-z]/)) {
+      items.push(createItem("floorSwitch", x, y, { group: value }));
+    }
+    // uppercase letters are doors
+    if (value.match(/[A-Z]/)) {
+      items.push(createItem("door", x, y, { group: value.toLowerCase() }));
+    }
+
+    if (value === "1") {
+      p1.x = x;
+      p1.y = y;
+    }
+    if (value === "2") {
+      p2.x = x;
+      p2.y = y;
+    }
+  }
+
+  return { map, items, p1, p2 };
 }

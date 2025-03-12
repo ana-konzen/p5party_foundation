@@ -1,7 +1,7 @@
 import { CONFIG } from "./config.js";
 import { Camera } from "./util/camera.js";
 import { RoleKeeper } from "./util/RoleKeeper.js";
-import { iterate2D, transpose2D } from "./util/utilities.js";
+import { iterate2D } from "./util/utilities.js";
 import { changeScene, scenes } from "./main.js";
 import { exportMap } from "./map.js";
 import * as input from "./input.js";
@@ -11,19 +11,12 @@ export let roleKeeper;
 let shared;
 const camera = new Camera();
 
-let mapDataDiv;
-
 export function preload() {
   shared = partyLoadShared("shared");
   roleKeeper = new RoleKeeper(["player1", "player2"], "unassigned");
 }
 
-export function setup() {
-  mapDataDiv = document.createElement("div");
-  mapDataDiv.classList.add("data");
-  document.querySelector("main").appendChild(mapDataDiv);
-  // add "hello world" to div
-}
+export function setup() {}
 
 export function enter() {
   for (const player of Object.values(shared.players)) {
@@ -32,8 +25,6 @@ export function enter() {
   }
   camera.follow(...aimCamera(), 1);
   input.reset();
-
-  mapDataDiv.innerHTML = exportMap(shared.map, shared.items);
 }
 
 function aimCamera() {

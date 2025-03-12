@@ -63,10 +63,14 @@ const doorTemplate = {
   // ...itemTemplate,
   type: "door",
   open: false,
+  group: "",
   size: 56,
   shape: "rect",
   color: "#335",
-  mapSymbol: "¶",
+  mapSymbol: function () {
+    console.log("floor", this);
+    return this.group.toUpperCase();
+  },
   blocksMove: function () {
     return !this.open;
   },
@@ -82,11 +86,14 @@ const doorTemplate = {
 const floorSwitchTemplate = {
   // ...itemTemplate,
   type: "floorSwitch",
-  targets: [],
+  group: "",
   size: 48,
   shape: "ellipse",
   color: "#335",
-  mapSymbol: "◉",
+  mapSymbol: function () {
+    console.log("floor", this);
+    return this.group;
+  },
 };
 
 const stairsTemplate = {
@@ -113,6 +120,13 @@ const templates = {
   bullet: bulletTemplate,
   stairs: stairsTemplate,
 };
+
+export function typeForSymbol(symbol) {
+  for (const [type, template] of Object.entries(templates)) {
+    if (template.mapSymbol === symbol) return type;
+  }
+  return false;
+}
 
 export function createItem(type, x, y, options = {}) {
   const item = {

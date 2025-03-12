@@ -1,4 +1,4 @@
-import { generateMap } from "./map.js";
+import { loadMap } from "./map.js";
 import { makeId } from "./util/utilities.js";
 import { filterInPlace } from "./util/utilities.js";
 import { CONFIG } from "./config.js";
@@ -127,13 +127,13 @@ function startPlaying() {
   if (shared.gameState !== "waiting") {
     throw new Error(`Invalid game state transition: ${shared.gameState} -> playing`);
   }
-  const { map, items } = generateMap(CONFIG.grid.cols, CONFIG.grid.rows);
+  const { map, items, p1, p2 } = loadMap();
 
   shared.map = map;
   shared.items = items;
   shared.players = {
-    player1: { x: 1, y: 1, color: "red", facing: "down", ammo: 10, score: 0, ready: true },
-    player2: { x: 1, y: 7, color: "blue", facing: "down", ammo: 10, score: 0, ready: true },
+    player1: { ...p1, color: "red", facing: "down", ammo: 10, score: 0, ready: true },
+    player2: { ...p2, color: "blue", facing: "down", ammo: 10, score: 0, ready: true },
   };
   shared.players.player1.ready = false;
   shared.players.player2.ready = false;
@@ -194,7 +194,7 @@ function updatePlaying() {
     );
     const pressed = pressedByGuest || pressedByCrate;
     itemsOfType("door")
-      .filter((g) => floorSwitch.targets.includes(g.id))
+      .filter((g) => floorSwitch.group === g.group)
       .forEach((door) => (door.open = pressed));
   }
 

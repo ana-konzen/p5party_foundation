@@ -2,6 +2,14 @@
 
 Keep some notes!
 
+# Links
+
+# Editing the Map
+
+https://asciiflow.com/
+https://monodraw.helftone.com/
+cmd-shift-p toggle overtype
+
 # Code Review
 
 # considering
