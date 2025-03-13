@@ -57,7 +57,7 @@ function onFace({ role, facing }) {
 function onMove({ role, dX, dY }) {
   if (!partyIsHost()) return;
   if (shared.gameState !== "playing") return;
-  console.log("onMove", role, dX, dY);
+
   const player = shared.players[role];
 
   const newX = player.x + dX;

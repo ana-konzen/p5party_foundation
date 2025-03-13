@@ -156,6 +156,8 @@ function drawAmmo() {
   push();
   noStroke();
   const p = shared.players[roleKeeper.myRole()];
+  if (!p) return;
+
   for (let i = 0; i < p.ammo; i++) {
     fill(p.color);
     ellipse(20 + i * 20, height - 20, 16);

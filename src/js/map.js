@@ -84,7 +84,6 @@ function frame(map, l, t, w, h, value = true) {
 
 function set(map, x, y, value) {
   if (x < 0 || x >= map.length || y < 0 || y >= map[0].length) {
-    console.log("reject", x, y, map);
     return;
   }
   map[x][y] = value;
@@ -105,7 +104,6 @@ export function exportMap(map = [[]], items = []) {
     if (x < 0 || x >= map.length || y < 0 || y >= map[0].length) continue;
     if (!mapSymbol) continue;
     // if map symbol is a function call it, otherwise use it as is
-    console.log("item", item);
     map[x][y] = typeof mapSymbol === "function" ? mapSymbol.call(item) : mapSymbol;
   }
 

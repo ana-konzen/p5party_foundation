@@ -29,7 +29,6 @@ export function filterInPlace(a, predicate) {
   let i = a.length;
   while (i--) {
     if (!predicate(a[i])) {
-      console.log("removing", a[i]);
       a.splice(i, 1);
     }
   }

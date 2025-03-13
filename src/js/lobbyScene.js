@@ -51,5 +51,6 @@ export function draw() {
 }
 
 export function mousePressed() {
+  if (roleKeeper.myRole() === "unassigned") return;
   partyEmit("setReady", { role: roleKeeper.myRole(), ready: true });
 }

@@ -16,24 +16,27 @@ export function reset() {
   controls.tick();
 }
 export function update() {
+  const role = roleKeeper.myRole();
+  if (role === "unassigned") return;
+
   if (controls.up.pressed) {
-    partyEmit("face", { role: roleKeeper.myRole(), facing: "up" });
-    partyEmit("move", { role: roleKeeper.myRole(), dX: 0, dY: -1 });
+    partyEmit("face", { role, facing: "up" });
+    partyEmit("move", { role, dX: 0, dY: -1 });
   }
   if (controls.down.pressed) {
-    partyEmit("face", { role: roleKeeper.myRole(), facing: "down" });
-    partyEmit("move", { role: roleKeeper.myRole(), dX: 0, dY: 1 });
+    partyEmit("face", { role, facing: "down" });
+    partyEmit("move", { role, dX: 0, dY: 1 });
   }
   if (controls.left.pressed) {
-    partyEmit("face", { role: roleKeeper.myRole(), facing: "left" });
-    partyEmit("move", { role: roleKeeper.myRole(), dX: -1, dY: 0 });
+    partyEmit("face", { role, facing: "left" });
+    partyEmit("move", { role, dX: -1, dY: 0 });
   }
   if (controls.right.pressed) {
-    partyEmit("face", { role: roleKeeper.myRole(), facing: "right" });
-    partyEmit("move", { role: roleKeeper.myRole(), dX: 1, dY: 0 });
+    partyEmit("face", { role, facing: "right" });
+    partyEmit("move", { role, dX: 1, dY: 0 });
   }
   if (controls.shoot.pressed) {
-    partyEmit("shoot", { role: roleKeeper.myRole() });
+    partyEmit("shoot", { role });
   }
 
   controls.tick();

@@ -82,7 +82,6 @@ const doorTemplate = {
   shape: "rect",
   color: "#335",
   mapSymbol: function () {
-    console.log("floor", this);
     return this.group.toUpperCase();
   },
   blocksMove: function () {
@@ -104,7 +103,6 @@ const floorSwitchTemplate = {
   shape: "ellipse",
   color: "#335",
   mapSymbol: function () {
-    console.log("floor", this);
     return this.group;
   },
 };
