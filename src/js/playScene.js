@@ -3,7 +3,7 @@ import { Camera } from "./util/camera.js";
 import { RoleKeeper } from "./util/RoleKeeper.js";
 import { iterate2D } from "./util/utilities.js";
 import { changeScene, scenes } from "./main.js";
-import { exportMap } from "./map.js";
+
 import * as input from "./input.js";
 import * as items from "./items.js";
 
@@ -14,6 +14,7 @@ const camera = new Camera();
 export function preload() {
   shared = partyLoadShared("shared");
   roleKeeper = new RoleKeeper(["player1", "player2"], "unassigned");
+  roleKeeper.setAutoAssign(false);
 }
 
 export function setup() {}

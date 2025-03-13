@@ -7,7 +7,12 @@ Todo:
 
 Bugs:
     x more than 2 players breaks
-    □ imporve lobby feedback, esp for spectators
+    x imporve lobby feedback, esp for spectators
+    □ improve role feedback in game play
+      □ highlight player's avatar
+      □ show "spectating" message
+      □ indicate missing player
+    □ idea: skip lobby altogether and let players join/leave from game screen?
 
 Template:
     

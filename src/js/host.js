@@ -3,6 +3,7 @@ import { makeId } from "./util/utilities.js";
 import { filterInPlace } from "./util/utilities.js";
 import { CONFIG } from "./config.js";
 import { itemsOfType, blocksMove, blocksPush } from "./items.js";
+import { roleKeeper } from "./playScene.js";
 
 export let shared;
 
@@ -19,9 +20,8 @@ export function preload() {
         facing: "up", // up | down | left | right
         ammo: 0, // number of bullets
         score: 0, // number of treasures collected
-        ready: false, // ready to start
       },
-      player2: { x: 0, y: 0, color: "black", facing: "up", ammo: 0, score: 0, ready: false },
+      player2: { x: 0, y: 0, color: "black", facing: "up", ammo: 0, score: 0 },
     },
 
     gameState: "waiting", // waiting | playing | win
@@ -29,22 +29,9 @@ export function preload() {
 }
 
 export function setup() {
-  if (!partyIsHost()) return;
-
-  partySubscribe("setReady", onSetReady);
   partySubscribe("face", onFace);
   partySubscribe("move", onMove);
   partySubscribe("shoot", onShoot);
-}
-
-function onSetReady({ role, ready }) {
-  if (!partyIsHost()) return;
-  if (shared.gameState !== "waiting") return;
-
-  shared.players[role].ready = ready;
-
-  const allReady = Object.values(shared.players).every((player) => player.ready);
-  if (allReady) startPlaying();
 }
 
 function onFace({ role, facing }) {
@@ -56,6 +43,7 @@ function onFace({ role, facing }) {
 
 function onMove({ role, dX, dY }) {
   if (!partyIsHost()) return;
+
   if (shared.gameState !== "playing") return;
 
   const player = shared.players[role];
@@ -132,11 +120,10 @@ function startPlaying() {
   shared.map = map;
   shared.items = items;
   shared.players = {
-    player1: { ...p1, color: "red", facing: "down", ammo: 10, score: 0, ready: true },
-    player2: { ...p2, color: "blue", facing: "down", ammo: 10, score: 0, ready: true },
+    player1: { ...p1, color: "red", facing: "down", ammo: 10, score: 0 },
+    player2: { ...p2, color: "blue", facing: "down", ammo: 10, score: 0 },
   };
-  shared.players.player1.ready = false;
-  shared.players.player2.ready = false;
+
   shared.gameState = "playing";
 }
 
@@ -165,11 +152,18 @@ function players() {
 export function update() {
   if (!partyIsHost()) return;
 
-  if (shared.gameState === "waiting") return;
+  if (shared.gameState === "waiting") updateWaiting();
   if (shared.gameState === "win") return;
   if (shared.gameState === "playing") updatePlaying();
 }
 
+function updateWaiting() {
+  const player1 = roleKeeper.guestsWithRole("player1")[0];
+  const player2 = roleKeeper.guestsWithRole("player2")[0];
+  if (player1 && player2) {
+    startPlaying();
+  }
+}
 function updatePlaying() {
   // check for treasure collection
   const treasures = itemsOfType("treasure");

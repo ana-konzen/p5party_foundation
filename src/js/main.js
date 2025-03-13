@@ -42,7 +42,7 @@ window.preload = function () {
 };
 
 window.setup = function () {
-  if (partyIsHost()) host.setup();
+  host.setup();
   partyToggleInfo(true);
   createCanvas(64 * 14, 64 * 10);
   noFill();
