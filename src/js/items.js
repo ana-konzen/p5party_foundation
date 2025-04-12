@@ -12,6 +12,7 @@ const itemTemplate = {
   shape: "rect",
   color: "magenta",
   alpha: 255,
+  mapSymbol: "?",
   draw: function () {
     push();
     ellipseMode(CENTER);
@@ -31,7 +32,6 @@ const itemTemplate = {
 };
 
 const crateTemplate = {
-  // ...itemTemplate,
   type: "crate",
   hits: 0,
   size: 56,
@@ -39,30 +39,51 @@ const crateTemplate = {
   color: "brown",
   alpha: 255,
   z: 1,
+  mapSymbol: "▢",
+  blocksPush: function () {
+    return true;
+  },
+};
+
+const waterTemplate = {
+  type: "water",
+  hits: 0,
+  size: 56,
+  shape: "rect",
+  color: "#006",
+  alpha: 255,
+  z: 1,
+  mapSymbol: "≈",
+  blocksMove: function () {
+    return true;
+  },
   blocksPush: function () {
     return true;
   },
 };
 
 const treasureTemplate = {
-  // ...itemTemplate,
   type: "treasure",
   size: 16,
   shape: "ellipse",
   color: "yellow",
   z: -1,
+  mapSymbol: "$",
   blocksPush: function () {
     return true;
   },
 };
 
 const doorTemplate = {
-  // ...itemTemplate,
   type: "door",
   open: false,
+  group: "",
   size: 56,
   shape: "rect",
   color: "#335",
+  mapSymbol: function () {
+    return this.group.toUpperCase();
+  },
   blocksMove: function () {
     return !this.open;
   },
@@ -76,19 +97,27 @@ const doorTemplate = {
 };
 
 const floorSwitchTemplate = {
-  // ...itemTemplate,
   type: "floorSwitch",
-  targets: [],
+  group: "",
   size: 48,
   shape: "ellipse",
   color: "#335",
+  mapSymbol: function () {
+    return this.group;
+  },
+};
+
+const stairsTemplate = {
+  type: "stairs",
+  size: 48,
+  mapSymbol: "↑",
 };
 
 const bulletTemplate = {
-  // ...itemTemplate,
   type: "bullet",
   size: 16,
   color: "gray",
+  mapSymbol: false,
   z: 2,
 };
 
@@ -98,13 +127,18 @@ const templates = {
   door: doorTemplate,
   floorSwitch: floorSwitchTemplate,
   bullet: bulletTemplate,
+  stairs: stairsTemplate,
+  water: waterTemplate,
 };
 
-export function createItem(type, x, y, options = {}) {
-  // if (!templates[type]) {
-  //   throw new Error(`Could not create item of unknown type: ${type}`);
-  // }
+export function typeForSymbol(symbol) {
+  for (const [type, template] of Object.entries(templates)) {
+    if (template.mapSymbol === symbol) return type;
+  }
+  return false;
+}
 
+export function createItem(type, x, y, options = {}) {
   const item = {
     id: makeId(),
     type,
@@ -116,6 +150,9 @@ export function createItem(type, x, y, options = {}) {
   return item;
 }
 
+export function expand(item) {
+  return { ...itemTemplate, ...templates[item.type], ...item };
+}
 export function blocksMove(item) {
   item = { ...itemTemplate, ...templates[item.type], ...item };
   // Object.setPrototypeOf(item, templates[item.type]);

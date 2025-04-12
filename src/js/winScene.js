@@ -7,8 +7,14 @@ export function preload() {
 }
 
 export function update() {
-  if (shared.status === "waiting") {
+  // sync scene to gameState
+  if (shared.gameState === "playing") {
+    changeScene(scenes.play);
+    return;
+  }
+  if (shared.gameState === "waiting") {
     changeScene(scenes.title);
+    return;
   }
 }
 export function draw() {
@@ -39,5 +45,5 @@ export function draw() {
 }
 
 export function mousePressed() {
-  changeScene(scenes.lobby);
+  changeScene(scenes.title);
 }

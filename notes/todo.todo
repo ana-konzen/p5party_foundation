@@ -5,7 +5,14 @@ Todo:
       x instead of shared.players[me.role_keeper.role] ??
       ✓ instead of for (player of Object.values(shared.players)) ??
 
-    
+Bugs:
+    x more than 2 players breaks
+    x imporve lobby feedback, esp for spectators
+    □ improve role feedback in game play
+      □ highlight player's avatar
+      □ show "spectating" message
+      □ indicate missing player
+    □ idea: skip lobby altogether and let players join/leave from game screen?
 
 Template:
     

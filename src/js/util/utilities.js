@@ -29,7 +29,6 @@ export function filterInPlace(a, predicate) {
   let i = a.length;
   while (i--) {
     if (!predicate(a[i])) {
-      console.log("removing", a[i]);
       a.splice(i, 1);
     }
   }
@@ -37,14 +36,7 @@ export function filterInPlace(a, predicate) {
 
 // creates a 2D array with the given dimensions and fills it with the given value
 export function createArray2D(cols, rows, value) {
-  const a = [];
-  for (let col = 0; col < cols; col++) {
-    for (let row = 0; row < rows; row++) {
-      a.push([]);
-      a[col][row] = value;
-    }
-  }
-  return a;
+  return Array.from({ length: cols }, () => Array(rows).fill(value));
 }
 
 export function makeId() {
@@ -72,4 +64,31 @@ export function* iterate2D(array) {
       yield [x, y, array[x][y]];
     }
   }
+}
+
+/**
+ * Converts a 2D array to a string representation. With each sub-array on a new line.
+ * @param {Array<Array<any>>} arr - The 2D array to convert to a string
+ * @returns {string} - A string representation of the 2D array
+ **/
+export function stringFrom2D(arr) {
+  const lines = arr.map((subArr) => JSON.stringify(subArr));
+  return "[\n  " + lines.join(",\n  ") + "\n]";
+}
+
+/**
+ * Transposes a 2D array (swaps rows and columns)
+ * @param {Array<Array<any>>} array - Original 2D array
+ * @returns {Array<Array<any>>} Transposed 2D array
+ */
+export function transpose2D(array) {
+  const cols = array.length;
+  const rows = array[0].length;
+  const result = createArray2D(rows, cols, null);
+
+  for (const [x, y, value] of iterate2D(array)) {
+    result[y][x] = value;
+  }
+
+  return result;
 }
