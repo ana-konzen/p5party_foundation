@@ -13,6 +13,27 @@ const itemTemplate = {
   color: "magenta",
   alpha: 255,
   mapSymbol: "?",
+  hasAsset: false,
+  multipleAssets: false,
+  state: null,
+  drawAsset: function (assets) {
+    push();
+    imageMode(CENTER);
+    const asset = this.multipleAssets ? random(assets[this.type]) : assets[this.type];
+    const img = this.state ? asset[this.state] : asset;
+    const imgRatio = img.width / img.height;
+    // const isVertical = img.width < img.height;
+    const imgW = CONFIG.grid.width;
+    const imgH = CONFIG.grid.width / imgRatio;
+    image(
+      img,
+      this.x * CONFIG.grid.width + CONFIG.grid.width / 2,
+      this.y * CONFIG.grid.height + CONFIG.grid.height / 2,
+      imgW,
+      imgH
+    );
+    pop();
+  },
   draw: function () {
     push();
     ellipseMode(CENTER);
@@ -23,8 +44,8 @@ const itemTemplate = {
 
     const shapeFunction = this.shape === "rect" ? rect : ellipse;
     shapeFunction(
-      this.x * CONFIG.grid.size + CONFIG.grid.size / 2,
-      this.y * CONFIG.grid.size + CONFIG.grid.size / 2,
+      this.x * CONFIG.grid.width + CONFIG.grid.width / 2,
+      this.y * CONFIG.grid.height + CONFIG.grid.height / 2,
       this.size
     );
     pop();
@@ -34,12 +55,11 @@ const itemTemplate = {
 const crateTemplate = {
   type: "crate",
   hits: 0,
-  size: 56,
-  shape: "rect",
-  color: "brown",
   alpha: 255,
-  z: 1,
+  z: 2,
   mapSymbol: "▢",
+  hasAsset: true,
+  multipleAssets: true,
   blocksPush: function () {
     return true;
   },
@@ -78,9 +98,7 @@ const doorTemplate = {
   type: "door",
   open: false,
   group: "",
-  size: 56,
-  shape: "rect",
-  color: "#335",
+  hasAsset: false,
   mapSymbol: function () {
     return this.group.toUpperCase();
   },
@@ -99,9 +117,8 @@ const doorTemplate = {
 const floorSwitchTemplate = {
   type: "floorSwitch",
   group: "",
-  size: 48,
-  shape: "ellipse",
-  color: "#335",
+  state: "up",
+  hasAsset: true,
   mapSymbol: function () {
     return this.group;
   },
@@ -164,25 +181,37 @@ export function blocksPush(item) {
   return item.blocksPush?.() ?? false;
 }
 
-export function drawItem(item) {
+export function drawItem(item, assets) {
   item = { ...itemTemplate, ...templates[item.type], ...item };
-  item.draw();
+  if (item.hasAsset) {
+    item.drawAsset(assets);
+  } else {
+    item.draw();
+  }
 }
 
 export function itemsOfType(type) {
   return shared.items.filter((g) => g.type === type);
 }
 
-export function drawItems(items) {
+export function drawItems(items, assets) {
   push();
 
   // sort items by z. undefined zs default to 0
   // sort on copy of array to avoid mutating shared object
-  const sortedItems = [...items].sort((a, b) => (a.z ?? 0) - (b.z ?? 0));
+  // sort also from top to bottom based on y
+  const sortedItems = [...items].sort((a, b) => {
+    const aZ = a.z ?? 0;
+    const bZ = b.z ?? 0;
+    if (aZ === bZ) {
+      return a.y - b.y;
+    }
+    return aZ - bZ;
+  });
   for (const item of sortedItems) {
     // don't draw items flagged to remove
     if (item.remove) continue;
-    drawItem(item);
+    drawItem(item, assets);
   }
   pop();
 }
