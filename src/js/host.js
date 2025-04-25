@@ -116,6 +116,7 @@ function startPlaying() {
   if (shared.gameState !== "waiting") {
     throw new Error(`Invalid game state transition: ${shared.gameState} -> playing`);
   }
+
   const { map, items, p1, p2 } = loadMap();
 
   shared.map = map;

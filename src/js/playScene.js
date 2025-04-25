@@ -11,7 +11,7 @@ export let roleKeeper;
 let shared;
 const camera = new Camera();
 
-const assets = {};
+export const assets = {};
 
 export function preload() {
   shared = partyLoadShared("shared");
@@ -113,7 +113,7 @@ export function draw() {
   // draw game
   drawGround();
   // drawGrid();
-  items.drawItems(shared.items, assets.items);
+  items.drawItems(shared.items);
   drawPlayers();
   drawMap();
   pop();

@@ -1,7 +1,8 @@
 import { CONFIG } from "./config.js";
 import { shared } from "./host.js";
-import { makeId } from "./util/utilities.js";
-
+import { makeId, getValueAtPath } from "./util/utilities.js";
+import { assets } from "./playScene.js";
+import { draw } from "./titleScene.js";
 const itemTemplate = {
   id: "",
   type: "item",
@@ -13,26 +14,10 @@ const itemTemplate = {
   color: "magenta",
   alpha: 255,
   mapSymbol: "?",
-  hasAsset: false,
-  multipleAssets: false,
+  assetPath: undefined,
+
   state: null,
-  drawAsset: function (assets) {
-    push();
-    imageMode(CENTER);
-    const asset = this.multipleAssets ? random(assets[this.type]) : assets[this.type];
-    const img = this.state ? asset[this.state] : asset;
-    const imgRatio = img.width / img.height;
-    const imgW = CONFIG.grid.width;
-    const imgH = CONFIG.grid.width / imgRatio;
-    image(
-      img,
-      this.x * CONFIG.grid.width + CONFIG.grid.width / 2,
-      this.y * CONFIG.grid.height + CONFIG.grid.height / 2,
-      imgW,
-      imgH
-    );
-    pop();
-  },
+
   draw: function () {
     push();
     ellipseMode(CENTER);
@@ -49,6 +34,30 @@ const itemTemplate = {
     );
     pop();
   },
+  init: function () {
+    console.log("init item", this.type);
+  },
+};
+
+const drawAsset = function (assetPath) {
+  if (!this.assetPath) return;
+  push();
+  imageMode(CENTER);
+
+  // draw the asset at the path provided, fall back to this.assetPath
+  const img = getValueAtPath(assets, assetPath ?? this.assetPath, assets.missingImage);
+
+  const imgRatio = img.width / img.height;
+  const imgW = CONFIG.grid.width;
+  const imgH = CONFIG.grid.width / imgRatio;
+  image(
+    img,
+    this.x * CONFIG.grid.width + CONFIG.grid.width / 2,
+    this.y * CONFIG.grid.height + CONFIG.grid.height / 2,
+    imgW,
+    imgH
+  );
+  pop();
 };
 
 const crateTemplate = {
@@ -57,8 +66,16 @@ const crateTemplate = {
   alpha: 255,
   z: 2,
   mapSymbol: "▢",
-  hasAsset: true,
-  multipleAssets: true,
+
+  draw: drawAsset,
+
+  assetPath: "items.crate.0",
+
+  init: function () {
+    console.log("init CRATE", this);
+    this.assetPath = "items.crate.1";
+  },
+
   blocksPush: function () {
     return true;
   },
@@ -72,8 +89,11 @@ const waterTemplate = {
   color: "#006",
   alpha: 255,
   z: 1,
-  hasAsset: true,
   mapSymbol: "≈",
+
+  draw: drawAsset,
+  assetPath: "items.water",
+
   blocksMove: function () {
     return true;
   },
@@ -84,12 +104,15 @@ const waterTemplate = {
 
 const treasureTemplate = {
   type: "treasure",
-  hasAsset: true,
   size: 16,
   shape: "ellipse",
   color: "yellow",
   z: -1,
   mapSymbol: "$",
+
+  draw: drawAsset,
+  assetPath: "items.treasure",
+
   blocksPush: function () {
     return true;
   },
@@ -99,11 +122,11 @@ const doorTemplate = {
   type: "door",
   open: false,
   group: "",
-
-  hasAsset: true,
   state: "closed",
-  hasState: true,
-
+  draw: function () {
+    this.assetPath = `items.door.${this.open ? "open" : "closed"}`;
+    drawAsset.call(this);
+  },
   mapSymbol: function () {
     return this.group.toUpperCase();
   },
@@ -113,17 +136,18 @@ const doorTemplate = {
   blocksPush: function () {
     return !this.open;
   },
-  // drawAsset: function (assets) {
-  //   if (this.open) return;
-  //   itemTemplate.drawAsset.call(this, assets);
-  // },
 };
 
 const floorSwitchTemplate = {
   type: "floorSwitch",
   group: "",
   state: "up",
-  hasAsset: true,
+
+  draw: function () {
+    this.assetPath = `items.floorSwitch.${this.state}`;
+    drawAsset.call(this);
+  },
+
   mapSymbol: function () {
     return this.group;
   },
@@ -133,7 +157,9 @@ const stairsTemplate = {
   type: "stairs",
   size: 48,
   mapSymbol: "↑",
-  hasAsset: true,
+
+  assetPath: "items.stairs",
+  draw: drawAsset,
 };
 
 const bulletTemplate = {
@@ -142,25 +168,12 @@ const bulletTemplate = {
   color: "gray",
   mapSymbol: false,
   z: 2,
-  hasAsset: true,
-  hasState: true,
+
+  draw: function () {
+    this.assetPath = `items.bullet.${this.state}`;
+    drawAsset.call(this);
+  },
   state: "player1",
-  // drawAsset: function (assets) {
-  //   push();
-  //   imageMode(CENTER);
-  //   const img = assets[this.type][this.player];
-  //   const imgRatio = img.width / img.height;
-  //   const imgW = CONFIG.grid.width;
-  //   const imgH = CONFIG.grid.width / imgRatio;
-  //   image(
-  //     img,
-  //     this.x * CONFIG.grid.width + CONFIG.grid.width / 2,
-  //     this.y * CONFIG.grid.height + CONFIG.grid.height / 2,
-  //     imgW,
-  //     imgH
-  //   );
-  //   pop();
-  // },
 };
 
 const templates = {
@@ -189,7 +202,14 @@ export function createItem(type, x, y, options = {}) {
     ...options,
   };
 
+  initItem(item);
+
   return item;
+}
+
+export function initItem(item) {
+  item = { ...itemTemplate, ...templates[item.type], ...item };
+  item.init();
 }
 
 export function expand(item) {
@@ -206,20 +226,17 @@ export function blocksPush(item) {
   return item.blocksPush?.() ?? false;
 }
 
-export function drawItem(item, assets) {
+export function drawItem(item) {
+  // todo (item.draw || templates[item.type].draw || itemTemplate.draw)()
   item = { ...itemTemplate, ...templates[item.type], ...item };
-  if (item.hasAsset) {
-    item.drawAsset(assets);
-  } else {
-    item.draw();
-  }
+  item.draw();
 }
 
 export function itemsOfType(type) {
   return shared.items.filter((g) => g.type === type);
 }
 
-export function drawItems(items, assets) {
+export function drawItems(items) {
   push();
 
   // sort items by z. undefined zs default to 0
@@ -236,7 +253,7 @@ export function drawItems(items, assets) {
   for (const item of sortedItems) {
     // don't draw items flagged to remove
     if (item.remove) continue;
-    drawItem(item, assets);
+    drawItem(item);
   }
   pop();
 }
