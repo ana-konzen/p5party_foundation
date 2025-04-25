@@ -1,7 +1,7 @@
 import { CONFIG } from "./config.js";
 import { Camera } from "./util/camera.js";
 import { RoleKeeper } from "./util/RoleKeeper.js";
-import { iterate2D, getScore } from "./util/utilities.js";
+import { iterate2D, getValueAtPath } from "./util/utilities.js";
 import { changeScene, scenes } from "./main.js";
 
 import * as input from "./input.js";
@@ -50,7 +50,6 @@ export function preload() {
     stairs: loadImage("assets/stairs/down.png"),
     treasure: loadImage("assets/treasure.png"),
   };
-
 }
 
 export function setup() {}
@@ -112,7 +111,8 @@ export function draw() {
   translate(-camera.x, -camera.y);
 
   // draw game
-  drawGrid();
+  drawGround();
+  // drawGrid();
   items.drawItems(shared.items, assets.items);
   drawPlayers();
   drawMap();
@@ -125,29 +125,48 @@ export function draw() {
   pop();
 }
 
+// eslint-disable-next-line no-unused-vars
 function drawGrid() {
   push();
-  // noFill();
-  // stroke(0, 0, 0, 50);
-  // for (let row = 0; row < CONFIG.grid.rows; row++) {
-  //   for (let col = 0; col < CONFIG.grid.cols; col++) {
-  //     rect(
-  //       col * CONFIG.grid.width,
-  //       row * CONFIG.grid.height,
-  //       CONFIG.grid.width,
-  //       CONFIG.grid.height
-  //     );
-  //   }
-  // }
+  noFill();
+  stroke(0, 0, 0, 50);
+  for (let row = 0; row < CONFIG.grid.rows; row++) {
+    for (let col = 0; col < CONFIG.grid.cols; col++) {
+      rect(
+        col * CONFIG.grid.width,
+        row * CONFIG.grid.height,
+        CONFIG.grid.width,
+        CONFIG.grid.height
+      );
+    }
+  }
 
+  pop();
+}
+
+function drawGround() {
   fill("#748853");
   stroke("black");
   strokeWeight(4);
   rect(0, 0, CONFIG.grid.cols * CONFIG.grid.width, CONFIG.grid.rows * CONFIG.grid.height);
-  pop();
 }
 
 function drawMap() {
+  function sampleGrid(grid, col, row) {
+    if (col < 0 || col >= CONFIG.grid.cols) return false;
+    if (row < 0 || row >= CONFIG.grid.rows) return false;
+    return grid[col][row];
+  }
+
+  function getScore(grid, col, row) {
+    let score = 0;
+    if (sampleGrid(grid, col, row - 1)) score += 1;
+    if (sampleGrid(grid, col + 1, row)) score += 2;
+    if (sampleGrid(grid, col, row + 1)) score += 4;
+    if (sampleGrid(grid, col - 1, row)) score += 8;
+    return score;
+  }
+
   push();
   noStroke();
   noFill();
@@ -156,7 +175,7 @@ function drawMap() {
     if (value) {
       const score = getScore(shared.map, x, y);
 
-      const img = random(assets.walls);
+      const img = getValueAtPath(assets, shared.map[x][y], assets.walls[0]);
 
       const imageWidth = img.width / 4;
       const imageHeight = img.height / 4;
@@ -188,11 +207,8 @@ function drawMap() {
 function drawPlayers() {
   push();
 
-
-  for (const playerKey of Object.keys(shared.players)) {
-    const player = shared.players[playerKey];
-    const playerImg = assets[playerKey][player.facing];
-
+  for (const [key, player] of Object.entries(shared.players)) {
+    const playerImg = assets[key][player.facing];
     const imgRatio = playerImg.width / playerImg.height;
     push();
     translate(

@@ -1,6 +1,6 @@
 import { createArray2D } from "./util/utilities.js";
 import { createItem, expand, typeForSymbol } from "./items.js";
-import { iterate2D, transpose2D } from "./util/utilities.js";
+import { iterate2D, transpose2D, randomInt } from "./util/utilities.js";
 
 export const mainMap = `
 #################################
@@ -123,20 +123,26 @@ export function loadMap(mapString = mainMap) {
   const p2 = {};
 
   for (const [x, y, value] of iterate2D(map)) {
-    map[x][y] = value === "#" ? true : false;
+    // set map/walls
+    map[x][y] = value === "#" ? `walls.${randomInt(3)}` : false;
+
+    // create basic items
     const itemType = typeForSymbol(value);
     if (itemType) {
       items.push(createItem(itemType, x, y));
     }
-    // lowercase letters are floorSwitches
+
+    // create floorSwitches for lowercase letters
     if (value.match(/[a-z]/)) {
       items.push(createItem("floorSwitch", x, y, { group: value }));
     }
-    // uppercase letters are doors
+
+    // create door for uppercase letters
     if (value.match(/[A-Z]/)) {
       items.push(createItem("door", x, y, { group: value.toLowerCase() }));
     }
 
+    // position players
     if (value === "1") {
       p1.x = x;
       p1.y = y;

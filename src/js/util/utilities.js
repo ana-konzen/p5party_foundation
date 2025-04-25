@@ -1,4 +1,3 @@
-import { CONFIG } from "../config.js";
 // return a random integer between in range [a, b)
 export function randomInt() {
   return floor(random(...arguments));
@@ -94,17 +93,30 @@ export function transpose2D(array) {
   return result;
 }
 
-export function sampleGrid(grid, col, row) {
-  if (col < 0 || col >= CONFIG.grid.cols) return false;
-  if (row < 0 || row >= CONFIG.grid.rows) return false;
-  return grid[col][row];
-}
+/**
+ * Safely retrieves a nested property value from an object using a dot-separated path.
+ *
+ * @param {Object} obj - The object to query.
+ * @param {string} path - Dot-separated string specifying the path of the property to get.
+ * @param {*} defaultValue - The value to return if the resolved value is `undefined`.
+ * @returns {*} Returns the value at the given path, or `defaultValue` if the path is invalid.
 
-export function getScore(grid, col, row) {
-  let score = 0;
-  if (sampleGrid(grid, col, row - 1)) score += 1;
-  if (sampleGrid(grid, col + 1, row)) score += 2;
-  if (sampleGrid(grid, col, row + 1)) score += 4;
-  if (sampleGrid(grid, col - 1, row)) score += 8;
-  return score;
+ */
+export function getValueAtPath(obj, path, defaultValue = false) {
+  if (!path) {
+    return obj === undefined ? defaultValue : obj;
+  }
+
+  const keys = path.split(".");
+  let result = obj;
+
+  for (const key of keys) {
+    if (result == null) {
+      result = undefined;
+      break;
+    }
+    result = result[key];
+  }
+
+  return result === undefined ? defaultValue : result;
 }
