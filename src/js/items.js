@@ -1,8 +1,8 @@
 import { CONFIG } from "./config.js";
 import { shared } from "./host.js";
-import { makeId, getValueAtPath } from "./util/utilities.js";
-import { assets } from "./playScene.js";
-import { draw } from "./titleScene.js";
+import { makeId } from "./util/utilities.js";
+import * as assets from "./assets.js";
+
 const itemTemplate = {
   id: "",
   type: "item",
@@ -41,23 +41,13 @@ const itemTemplate = {
 
 const drawAsset = function (assetPath) {
   if (!this.assetPath) return;
-  push();
-  imageMode(CENTER);
-
-  // draw the asset at the path provided, fall back to this.assetPath
-  const img = getValueAtPath(assets, assetPath ?? this.assetPath, assets.missingImage);
-
-  const imgRatio = img.width / img.height;
-  const imgW = CONFIG.grid.width;
-  const imgH = CONFIG.grid.width / imgRatio;
-  image(
-    img,
-    this.x * CONFIG.grid.width + CONFIG.grid.width / 2,
-    this.y * CONFIG.grid.height + CONFIG.grid.height / 2,
-    imgW,
-    imgH
-  );
-  pop();
+  assets.addToQueue({
+    x: this.x,
+    y: this.y,
+    z: this.z ?? 0,
+    yOffset: this.yOffset ?? 0,
+    path: assetPath ?? this.assetPath,
+  });
 };
 
 const crateTemplate = {
@@ -65,6 +55,7 @@ const crateTemplate = {
   hits: 0,
   alpha: 255,
   z: 2,
+  yOffset: -CONFIG.grid.height,
   mapSymbol: "▢",
 
   draw: drawAsset,
@@ -107,12 +98,9 @@ const treasureTemplate = {
   size: 16,
   shape: "ellipse",
   color: "yellow",
-  z: -1,
   mapSymbol: "$",
-
   draw: drawAsset,
   assetPath: "items.treasure",
-
   blocksPush: function () {
     return true;
   },
@@ -122,7 +110,7 @@ const doorTemplate = {
   type: "door",
   open: false,
   group: "",
-  state: "closed",
+  yOffset: -CONFIG.grid.height * 2,
   draw: function () {
     this.assetPath = `items.door.${this.open ? "open" : "closed"}`;
     drawAsset.call(this);
@@ -239,18 +227,7 @@ export function itemsOfType(type) {
 export function drawItems(items) {
   push();
 
-  // sort items by z. undefined zs default to 0
-  // sort on copy of array to avoid mutating shared object
-  // sort also from top to bottom based on y
-  const sortedItems = [...items].sort((a, b) => {
-    const aZ = a.z ?? 0;
-    const bZ = b.z ?? 0;
-    if (aZ === bZ) {
-      return a.y - b.y;
-    }
-    return aZ - bZ;
-  });
-  for (const item of sortedItems) {
+  for (const item of items) {
     // don't draw items flagged to remove
     if (item.remove) continue;
     drawItem(item);

@@ -3,6 +3,7 @@ import { Camera } from "./util/camera.js";
 import { RoleKeeper } from "./util/RoleKeeper.js";
 import { iterate2D, getValueAtPath } from "./util/utilities.js";
 import { changeScene, scenes } from "./main.js";
+import * as assets from "./assets.js";
 
 import * as input from "./input.js";
 import * as items from "./items.js";
@@ -11,45 +12,10 @@ export let roleKeeper;
 let shared;
 const camera = new Camera();
 
-export const assets = {};
-
 export function preload() {
   shared = partyLoadShared("shared");
   roleKeeper = new RoleKeeper(["player1", "player2"], "unassigned");
   roleKeeper.setAutoAssign(false);
-
-  assets.player1 = {
-    left: loadImage("assets/player1/left.png"),
-    right: loadImage("assets/player1/right.png"),
-    up: loadImage("assets/player1/up.png"),
-    down: loadImage("assets/player1/down.png"),
-  };
-  assets.player2 = {
-    left: loadImage("assets/player2/left.png"),
-    right: loadImage("assets/player2/right.png"),
-    up: loadImage("assets/player2/up.png"),
-    down: loadImage("assets/player2/down.png"),
-  };
-  assets.walls = [
-    loadImage("assets/tile_map/1.png"),
-    loadImage("assets/tile_map/2.png"),
-    loadImage("assets/tile_map/3.png"),
-  ];
-  assets.items = {
-    crate: [loadImage("assets/crystals/1.png"), loadImage("assets/crystals/2.png")],
-    door: { open: loadImage("assets/door/open.png"), closed: loadImage("assets/door/closed.png") },
-    floorSwitch: {
-      up: loadImage("assets/switch/up.png"),
-      down: loadImage("assets/switch/down.png"),
-    },
-    bullet: {
-      player1: loadImage("assets/bullets/player1.png"),
-      player2: loadImage("assets/bullets/player2.png"),
-    },
-    water: loadImage("assets/water.png"),
-    stairs: loadImage("assets/stairs/down.png"),
-    treasure: loadImage("assets/treasure.png"),
-  };
 }
 
 export function setup() {}
@@ -115,6 +81,7 @@ export function draw() {
   // drawGrid();
   items.drawItems(shared.items);
   drawPlayers();
+  assets.drawQueue();
   drawMap();
   pop();
 
@@ -175,7 +142,7 @@ function drawMap() {
     if (value) {
       const score = getScore(shared.map, x, y);
 
-      const img = getValueAtPath(assets, shared.map[x][y], assets.walls[0]);
+      const img = getValueAtPath(assets.assets, shared.map[x][y], assets.assets.walls[0]);
 
       const imageWidth = img.width / 4;
       const imageHeight = img.height / 4;
@@ -205,20 +172,15 @@ function drawMap() {
 }
 
 function drawPlayers() {
-  push();
-
   for (const [key, player] of Object.entries(shared.players)) {
-    const playerImg = assets[key][player.facing];
-    const imgRatio = playerImg.width / playerImg.height;
-    push();
-    translate(
-      localPlayer(player).x * CONFIG.grid.width,
-      localPlayer(player).y * CONFIG.grid.height
-    );
-    image(playerImg, 0, -CONFIG.grid.height, CONFIG.grid.width, CONFIG.grid.width / imgRatio);
-    pop();
+    assets.addToQueue({
+      x: localPlayer(player).x,
+      y: localPlayer(player).y,
+      yOffset: -CONFIG.grid.height,
+      z: 2,
+      path: `${key}.${player.facing}`,
+    });
   }
-  pop();
 }
 
 function drawScores() {
