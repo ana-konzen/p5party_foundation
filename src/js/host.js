@@ -108,6 +108,7 @@ function onShoot({ role }) {
     y: player.y,
     facing: player.facing,
     color: player.color,
+    state: role,
   });
 }
 
@@ -115,13 +116,14 @@ function startPlaying() {
   if (shared.gameState !== "waiting") {
     throw new Error(`Invalid game state transition: ${shared.gameState} -> playing`);
   }
+
   const { map, items, p1, p2 } = loadMap();
 
   shared.map = map;
   shared.items = items;
   shared.players = {
-    player1: { ...p1, color: "red", facing: "down", ammo: 10, score: 0 },
-    player2: { ...p2, color: "blue", facing: "down", ammo: 10, score: 0 },
+    player1: { ...p1, color: "purple", facing: "down", ammo: 10, score: 0 },
+    player2: { ...p2, color: "orange", facing: "down", ammo: 10, score: 0 },
   };
 
   shared.gameState = "playing";
@@ -187,9 +189,17 @@ function updatePlaying() {
       (crate) => crate.x === floorSwitch.x && crate.y === floorSwitch.y
     );
     const pressed = pressedByGuest || pressedByCrate;
+    if (pressed) {
+      floorSwitch.state = "down";
+    } else {
+      floorSwitch.state = "up";
+    }
     itemsOfType("door")
       .filter((g) => floorSwitch.group === g.group)
-      .forEach((door) => (door.open = pressed));
+      .forEach((door) => {
+        door.open = pressed;
+        door.state = pressed ? "open" : "closed";
+      });
   }
 
   const stairs = itemsOfType("stairs");

@@ -92,3 +92,31 @@ export function transpose2D(array) {
 
   return result;
 }
+
+/**
+ * Safely retrieves a nested property value from an object using a dot-separated path.
+ *
+ * @param {Object} obj - The object to query.
+ * @param {string} path - Dot-separated string specifying the path of the property to get.
+ * @param {*} defaultValue - The value to return if the resolved value is `undefined`.
+ * @returns {*} Returns the value at the given path, or `defaultValue` if the path is invalid.
+
+ */
+export function getValueAtPath(obj, path, defaultValue = false) {
+  if (!path) {
+    return obj === undefined ? defaultValue : obj;
+  }
+
+  const keys = path.split(".");
+  let result = obj;
+
+  for (const key of keys) {
+    if (result == null) {
+      result = undefined;
+      break;
+    }
+    result = result[key];
+  }
+
+  return result === undefined ? defaultValue : result;
+}
