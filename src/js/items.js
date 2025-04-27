@@ -75,10 +75,6 @@ const crateTemplate = {
 const waterTemplate = {
   type: "water",
   hits: 0,
-  size: 56,
-  shape: "rect",
-  color: "#006",
-  alpha: 255,
   z: 1,
   mapSymbol: "≈",
 
@@ -95,9 +91,6 @@ const waterTemplate = {
 
 const treasureTemplate = {
   type: "treasure",
-  size: 16,
-  shape: "ellipse",
-  color: "yellow",
   mapSymbol: "$",
   draw: drawAsset,
   assetPath: "items.treasure",
@@ -143,25 +136,20 @@ const floorSwitchTemplate = {
 
 const stairsTemplate = {
   type: "stairs",
-  size: 48,
   mapSymbol: "↑",
-
   assetPath: "items.stairs",
   draw: drawAsset,
 };
 
 const bulletTemplate = {
   type: "bullet",
-  size: 16,
-  color: "gray",
   mapSymbol: false,
   z: 2,
-
   draw: function () {
-    this.assetPath = `items.bullet.${this.state}`;
+    this.assetPath = `items.bullet.${this.player}`;
     drawAsset.call(this);
   },
-  state: "player1",
+  player: "player1",
 };
 
 const templates = {
