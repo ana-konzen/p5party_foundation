@@ -1,7 +1,7 @@
 import { CONFIG } from "./config.js";
 import { Camera } from "./util/camera.js";
 import { RoleKeeper } from "./util/RoleKeeper.js";
-import { iterate2D, getValueAtPath } from "./util/utilities.js";
+import { iterate2D } from "./util/utilities.js";
 import { changeScene, scenes } from "./main.js";
 import * as assets from "./assets.js";
 
@@ -70,7 +70,6 @@ export function draw() {
 
   clear();
 
-  push();
   // scroll
   translate(width * 0.5, height * 0.5);
   scale(1);
@@ -81,8 +80,12 @@ export function draw() {
   // drawGrid();
   items.drawItems(shared.items);
   drawPlayers();
-  assets.drawQueue();
   drawMap();
+
+  push();
+  noFill();
+  noStroke();
+  assets.drawQueue();
   pop();
 
   // draw overlay
@@ -134,51 +137,28 @@ function drawMap() {
     return score;
   }
 
-  push();
-  noStroke();
-  noFill();
-
   for (const [x, y, value] of iterate2D(shared.map)) {
     if (value) {
       const score = getScore(shared.map, x, y);
 
-      const img = getValueAtPath(assets.assets, shared.map[x][y], assets.assets.walls[0]);
-
-      const imageWidth = img.width / 4;
-      const imageHeight = img.height / 4;
-      const imageRatio = imageWidth / imageHeight;
-
-      const sx = (score % 4) * imageWidth;
-      const sy = floor(score / 4) * imageHeight;
-      push();
-      translate(x * CONFIG.grid.width, y * CONFIG.grid.height - CONFIG.grid.height);
-      image(
-        img,
-        0,
-        0,
-        CONFIG.grid.width,
-        CONFIG.grid.width / imageRatio,
-        sx,
-        sy,
-        imageWidth,
-        imageHeight
-      );
-
-      pop();
+      assets.addToQueue({
+        path: `${shared.map[x][y]}.${score}`,
+        x: x,
+        y: y,
+        yOffset: -CONFIG.grid.height,
+      });
     }
   }
-
-  pop();
 }
 
 function drawPlayers() {
   for (const [key, player] of Object.entries(shared.players)) {
     assets.addToQueue({
+      path: `${key}.${player.facing}`,
       x: localPlayer(player).x,
       y: localPlayer(player).y,
-      yOffset: -CONFIG.grid.height,
       z: 2,
-      path: `${key}.${player.facing}`,
+      yOffset: -CONFIG.grid.height,
     });
   }
 }

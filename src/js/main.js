@@ -45,6 +45,7 @@ window.preload = function () {
 
 window.setup = function () {
   host.setup();
+  assets.setup();
   partyToggleInfo(true);
   createCanvas(64 * 14, 64 * 10);
   noFill();

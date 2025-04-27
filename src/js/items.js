@@ -1,6 +1,6 @@
 import { CONFIG } from "./config.js";
 import { shared } from "./host.js";
-import { makeId } from "./util/utilities.js";
+import { makeId, randomInt } from "./util/utilities.js";
 import * as assets from "./assets.js";
 
 const itemTemplate = {
@@ -42,11 +42,11 @@ const itemTemplate = {
 const drawAsset = function (assetPath) {
   if (!this.assetPath) return;
   assets.addToQueue({
+    path: assetPath ?? this.assetPath,
     x: this.x,
     y: this.y,
     z: this.z ?? 0,
     yOffset: this.yOffset ?? 0,
-    path: assetPath ?? this.assetPath,
   });
 };
 
@@ -58,14 +58,14 @@ const crateTemplate = {
   yOffset: -CONFIG.grid.height,
   mapSymbol: "▢",
 
-  draw: drawAsset,
-
-  assetPath: "items.crate.0",
-
   init: function () {
     console.log("init CRATE", this);
-    this.assetPath = "items.crate.1";
+    this.assetPath = `items.crate.${randomInt(2)}`;
   },
+
+  draw: drawAsset,
+
+  assetPath: "items.crate.1",
 
   blocksPush: function () {
     return true;

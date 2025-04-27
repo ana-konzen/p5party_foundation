@@ -18,7 +18,7 @@ export function preload() {
     up: loadImage("assets/player2/up.png"),
     down: loadImage("assets/player2/down.png"),
   };
-  assets.walls = [
+  assets.tiles = [
     loadImage("assets/tile_map/1.png"),
     loadImage("assets/tile_map/2.png"),
     loadImage("assets/tile_map/3.png"),
@@ -40,6 +40,10 @@ export function preload() {
   };
 }
 
+export function setup() {
+  assets.walls = loadWalls();
+}
+
 export function addToQueue(imageInfo) {
   assetsQueue.push(imageInfo);
 }
@@ -48,7 +52,9 @@ function sortQueue() {
   // sort images by z position if y is the same
   assetsQueue.sort((a, b) => {
     if (a.y === b.y) {
-      return a.z - b.z;
+      const aZ = a.z ?? 0;
+      const bZ = b.z ?? 0;
+      return aZ - bZ;
     }
     return a.y - b.y;
   });
@@ -76,4 +82,26 @@ export function drawQueue() {
   }
   pop();
   assetsQueue.length = 0; // clear the queue
+}
+
+function loadWalls() {
+  const walls = [];
+  const score = 16;
+
+  for (const tileMap of assets.tiles) {
+    const wallSet = [];
+    const imgWidth = tileMap.width / 4;
+    const imgHeight = tileMap.height / 4;
+
+    for (let i = 0; i < score; i++) {
+      const sx = (i % 4) * imgWidth;
+      const sy = floor(i / 4) * imgHeight;
+      const wall = tileMap.get(sx, sy, imgWidth, imgHeight);
+      wallSet.push(wall);
+    }
+
+    walls.push(wallSet);
+  }
+
+  return walls;
 }
