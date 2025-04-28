@@ -19,6 +19,7 @@ import * as playScene from "./playScene.js";
 import * as winScene from "./winScene.js";
 
 import * as host from "./host.js";
+import * as assets from "./assets.js";
 
 let currentScene; // the scene being displayed
 
@@ -38,11 +39,13 @@ window.preload = function () {
   partyConnect("wss://demoserver.p5party.org", "bakse-tomb");
 
   host.preload();
+  assets.preload();
   Object.values(scenes).forEach((scene) => scene.preload?.());
 };
 
 window.setup = function () {
   host.setup();
+  assets.setup();
   partyToggleInfo(true);
   createCanvas(64 * 14, 64 * 10);
   noFill();

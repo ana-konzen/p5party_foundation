@@ -108,7 +108,7 @@ function onShoot({ role }) {
     y: player.y,
     facing: player.facing,
     color: player.color,
-    state: role,
+    player: role,
   });
 }
 

@@ -1,8 +1,9 @@
 import { CONFIG } from "./config.js";
 import { Camera } from "./util/camera.js";
 import { RoleKeeper } from "./util/RoleKeeper.js";
-import { iterate2D, getValueAtPath } from "./util/utilities.js";
+import { iterate2D } from "./util/utilities.js";
 import { changeScene, scenes } from "./main.js";
+import * as assets from "./assets.js";
 
 import * as input from "./input.js";
 import * as items from "./items.js";
@@ -11,45 +12,10 @@ export let roleKeeper;
 let shared;
 const camera = new Camera();
 
-export const assets = {};
-
 export function preload() {
   shared = partyLoadShared("shared");
   roleKeeper = new RoleKeeper(["player1", "player2"], "unassigned");
   roleKeeper.setAutoAssign(false);
-
-  assets.player1 = {
-    left: loadImage("assets/player1/left.png"),
-    right: loadImage("assets/player1/right.png"),
-    up: loadImage("assets/player1/up.png"),
-    down: loadImage("assets/player1/down.png"),
-  };
-  assets.player2 = {
-    left: loadImage("assets/player2/left.png"),
-    right: loadImage("assets/player2/right.png"),
-    up: loadImage("assets/player2/up.png"),
-    down: loadImage("assets/player2/down.png"),
-  };
-  assets.walls = [
-    loadImage("assets/tile_map/1.png"),
-    loadImage("assets/tile_map/2.png"),
-    loadImage("assets/tile_map/3.png"),
-  ];
-  assets.items = {
-    crate: [loadImage("assets/crystals/1.png"), loadImage("assets/crystals/2.png")],
-    door: { open: loadImage("assets/door/open.png"), closed: loadImage("assets/door/closed.png") },
-    floorSwitch: {
-      up: loadImage("assets/switch/up.png"),
-      down: loadImage("assets/switch/down.png"),
-    },
-    bullet: {
-      player1: loadImage("assets/bullets/player1.png"),
-      player2: loadImage("assets/bullets/player2.png"),
-    },
-    water: loadImage("assets/water.png"),
-    stairs: loadImage("assets/stairs/down.png"),
-    treasure: loadImage("assets/treasure.png"),
-  };
 }
 
 export function setup() {}
@@ -104,7 +70,6 @@ export function draw() {
 
   clear();
 
-  push();
   // scroll
   translate(width * 0.5, height * 0.5);
   scale(1);
@@ -116,6 +81,11 @@ export function draw() {
   items.drawItems(shared.items);
   drawPlayers();
   drawMap();
+
+  push();
+  noFill();
+  noStroke();
+  assets.drawQueue();
   pop();
 
   // draw overlay
@@ -167,58 +137,30 @@ function drawMap() {
     return score;
   }
 
-  push();
-  noStroke();
-  noFill();
-
   for (const [x, y, value] of iterate2D(shared.map)) {
     if (value) {
       const score = getScore(shared.map, x, y);
 
-      const img = getValueAtPath(assets, shared.map[x][y], assets.walls[0]);
-
-      const imageWidth = img.width / 4;
-      const imageHeight = img.height / 4;
-      const imageRatio = imageWidth / imageHeight;
-
-      const sx = (score % 4) * imageWidth;
-      const sy = floor(score / 4) * imageHeight;
-      push();
-      translate(x * CONFIG.grid.width, y * CONFIG.grid.height - CONFIG.grid.height);
-      image(
-        img,
-        0,
-        0,
-        CONFIG.grid.width,
-        CONFIG.grid.width / imageRatio,
-        sx,
-        sy,
-        imageWidth,
-        imageHeight
-      );
-
-      pop();
+      assets.addToQueue({
+        path: `${shared.map[x][y]}.${score}`,
+        x: x,
+        y: y,
+        yOffset: -CONFIG.grid.height,
+      });
     }
   }
-
-  pop();
 }
 
 function drawPlayers() {
-  push();
-
   for (const [key, player] of Object.entries(shared.players)) {
-    const playerImg = assets[key][player.facing];
-    const imgRatio = playerImg.width / playerImg.height;
-    push();
-    translate(
-      localPlayer(player).x * CONFIG.grid.width,
-      localPlayer(player).y * CONFIG.grid.height
-    );
-    image(playerImg, 0, -CONFIG.grid.height, CONFIG.grid.width, CONFIG.grid.width / imgRatio);
-    pop();
+    assets.addToQueue({
+      path: `${key}.${player.facing}`,
+      x: localPlayer(player).x,
+      y: localPlayer(player).y,
+      z: 2,
+      yOffset: -CONFIG.grid.height,
+    });
   }
-  pop();
 }
 
 function drawScores() {
