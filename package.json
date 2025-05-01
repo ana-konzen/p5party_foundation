@@ -4,6 +4,9 @@
   "description": "Project template for more complex p5.party games",
   "author": "Justin Bakse",
   "license": "MIT",
+  "scripts": {
+    "slice": "/Applications/Aseprite.app/Contents/MacOS/aseprite -b ./production/color_test.aseprite --save-as ./src/generated/color-{slice}.png"
+  },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.0",
     "@eslint/js": "^9.21.0",
