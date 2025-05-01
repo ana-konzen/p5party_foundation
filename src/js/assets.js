@@ -20,8 +20,8 @@ export function preload() {
   };
   assets.tiles = [
     loadImage("assets/tile_map/1.png"),
-    loadImage("assets/tile_map/2.png"),
-    loadImage("assets/tile_map/3.png"),
+    // loadImage("assets/tile_map/2.png"),
+    // loadImage("assets/tile_map/3.png"),
   ];
   assets.items = {
     crate: [loadImage("assets/crystals/1.png"), loadImage("assets/crystals/2.png")],
