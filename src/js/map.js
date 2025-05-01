@@ -1,16 +1,16 @@
 import { createArray2D } from "./util/utilities.js";
-import { createItem, expand, typeForSymbol } from "./items.js";
+import { createItem, expand, typeForMapSymbol } from "./items.js";
 import { iterate2D, transpose2D, randomInt } from "./util/utilities.js";
 
 export const mainMap = `
 #################################
-#≈≈≈≈≈≈≈#      b#       #       #
-#       #       B   #   #       #
+#       #      b#       #       #
+#▢▢▢▢▢▢▢#       B   #   #       #
 #1     a#▢      #  ▢ ####       #
 # ↑▢$   A       ###▢$$$$#      ↑#
 #2      #       #  ▢ ####       #
 #       #           #           #
-#≈≈≈≈≈≈≈#       #       #       #
+#       #       #       #       #
 #################################
 `.trim();
 
@@ -128,7 +128,7 @@ export function loadMap(mapString = mainMap) {
     map[x][y] = value === "#" ? "walls.0" : false;
 
     // create basic items
-    const itemType = typeForSymbol(value);
+    const itemType = typeForMapSymbol(value);
     if (itemType) {
       items.push(createItem(itemType, x, y));
     }
