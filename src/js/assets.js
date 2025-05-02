@@ -18,7 +18,7 @@ export function preload() {
     up: loadImage("assets/player2/up.png"),
     down: loadImage("assets/player2/down.png"),
   };
-  assets.tiles = [
+  assets.tileMaps = [
     loadImage("assets/tile_map/1.png"),
     // loadImage("assets/tile_map/2.png"),
     // loadImage("assets/tile_map/3.png"),
@@ -41,7 +41,10 @@ export function preload() {
 }
 
 export function setup() {
-  assets.walls = loadWalls();
+  assets.walls = [];
+  for (const tileMap of assets.tileMaps) {
+    assets.walls.push(sliceTiles(tileMap));
+  }
 }
 
 export function addToQueue(imageInfo) {
@@ -84,24 +87,19 @@ export function drawQueue() {
   assetsQueue.length = 0; // clear the queue
 }
 
-function loadWalls() {
-  const walls = [];
-  const score = 16;
+function sliceTiles(tileMap) {
+  const imgWidth = tileMap.width / 4;
+  const imgHeight = tileMap.height / 4;
+  const numTiles = 16;
 
-  for (const tileMap of assets.tiles) {
-    const wallSet = [];
-    const imgWidth = tileMap.width / 4;
-    const imgHeight = tileMap.height / 4;
+  const tiles = [];
 
-    for (let i = 0; i < score; i++) {
-      const sx = (i % 4) * imgWidth;
-      const sy = floor(i / 4) * imgHeight;
-      const wall = tileMap.get(sx, sy, imgWidth, imgHeight);
-      wallSet.push(wall);
-    }
-
-    walls.push(wallSet);
+  for (let i = 0; i < numTiles; i++) {
+    const sx = (i % 4) * imgWidth;
+    const sy = floor(i / 4) * imgHeight;
+    const tile = tileMap.get(sx, sy, imgWidth, imgHeight);
+    tiles.push(tile);
   }
 
-  return walls;
+  return tiles;
 }
