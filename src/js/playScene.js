@@ -131,7 +131,7 @@ function drawGround() {
     groundCanvas.image(img, x * CONFIG.grid.width, y * CONFIG.grid.height, img.width * imgScale);
   }
   groundCanvas.push();
-  groundCanvas.tint(255, 180);
+  groundCanvas.tint(255, 150);
 
   groundCanvas.imageMode(CENTER);
   for (let row = 0; row < CONFIG.grid.rows; row++) {
@@ -151,7 +151,7 @@ function drawGround() {
 
   groundCanvas.push();
   groundCanvas.blendMode(SOFT_LIGHT);
-  groundCanvas.tint(255, 180);
+  groundCanvas.tint(255, 150);
 
   for (let row = 0; row < CONFIG.grid.rows; row++) {
     for (let col = 0; col < CONFIG.grid.cols; col++) {
