@@ -130,6 +130,8 @@ function drawGround() {
     const img = random(assets.assets.ground[type]);
     groundCanvas.image(img, x * CONFIG.grid.width, y * CONFIG.grid.height, img.width * imgScale);
   }
+  groundCanvas.push();
+  groundCanvas.tint(255, 180);
 
   groundCanvas.imageMode(CENTER);
   for (let row = 0; row < CONFIG.grid.rows; row++) {
@@ -145,8 +147,11 @@ function drawGround() {
     }
   }
 
+  groundCanvas.pop();
+
   groundCanvas.push();
   groundCanvas.blendMode(SOFT_LIGHT);
+  groundCanvas.tint(255, 180);
 
   for (let row = 0; row < CONFIG.grid.rows; row++) {
     for (let col = 0; col < CONFIG.grid.cols; col++) {
