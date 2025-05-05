@@ -69,7 +69,6 @@ export function drawQueue() {
   imageMode(CENTER);
   for (const imageInfo of assetsQueue) {
     const { path, x, y } = imageInfo;
-    const yOffset = imageInfo.yOffset ?? 0;
     const img = getValueAtPath(assets, path, assets.missingImage);
     const imgRatio = img.width / img.height;
     const imgW = CONFIG.grid.width;
@@ -78,7 +77,7 @@ export function drawQueue() {
     image(
       img,
       x * CONFIG.grid.width + CONFIG.grid.width / 2,
-      y * CONFIG.grid.height + imgH / 2 + yOffset,
+      y * CONFIG.grid.height - imgH / 2 + CONFIG.grid.height,
       imgW,
       imgH
     );

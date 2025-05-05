@@ -145,7 +145,6 @@ function drawMap() {
         path: `${shared.map[x][y]}.${score}`,
         x: x,
         y: y,
-        yOffset: 0,
       });
     }
   }
@@ -158,7 +157,6 @@ function drawPlayers() {
       x: localPlayer(player).x,
       y: localPlayer(player).y,
       z: 2,
-      yOffset: -CONFIG.grid.height,
     });
   }
 }

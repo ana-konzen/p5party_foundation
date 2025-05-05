@@ -1,4 +1,3 @@
-import { CONFIG } from "./config.js";
 import { shared } from "./host.js";
 import { makeId, randomInt } from "./util/utilities.js";
 import * as assets from "./assets.js";
@@ -32,7 +31,6 @@ const itemTemplate = {
       x: this.x,
       y: this.y,
       z: this.z ?? 0,
-      yOffset: this.yOffset ?? 0,
     });
   },
 };
@@ -55,9 +53,6 @@ const crateTemplate = {
   blocksPush: function () {
     return true;
   },
-
-  //todo: remove
-  yOffset: -CONFIG.grid.height,
 };
 
 const waterTemplate = {
@@ -101,7 +96,6 @@ const doorTemplate = {
       x: this.x,
       y: this.y,
       z: this.z ?? 0,
-      yOffset: this.yOffset ?? 0,
     });
   },
   blocksMove: function () {
@@ -110,9 +104,6 @@ const doorTemplate = {
   blocksPush: function () {
     return !this.open;
   },
-
-  //todo: remove
-  yOffset: 0,
 };
 
 const floorSwitchTemplate = {
@@ -130,7 +121,6 @@ const floorSwitchTemplate = {
       x: this.x,
       y: this.y,
       z: this.z ?? 0,
-      yOffset: this.yOffset ?? 0,
     });
   },
 };
@@ -154,7 +144,6 @@ const bulletTemplate = {
       x: this.x,
       y: this.y,
       z: this.z ?? 0,
-      yOffset: this.yOffset ?? 0,
     });
   },
 };
