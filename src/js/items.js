@@ -72,7 +72,6 @@ const crateTemplate = {
 
   hasLight: true,
 
-  yOffset: CONFIG.grid.height,
   alpha: 255,
   hits: 0,
 
