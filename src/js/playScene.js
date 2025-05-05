@@ -154,10 +154,17 @@ function drawMap() {
 function drawPlayers() {
   for (const [key, player] of Object.entries(shared.players)) {
     assets.addToQueue({
-      path: `${key}.${player.facing}`,
+      path: `${key}.${player.facing}.base`,
       x: localPlayer(player).x,
       y: localPlayer(player).y,
       sort: 2,
+    });
+    assets.addToQueue({
+      path: `${key}.${player.facing}.light`,
+      x: localPlayer(player).x,
+      y: localPlayer(player).y,
+      blendMode: SOFT_LIGHT,
+      sort: 10,
     });
   }
 }
