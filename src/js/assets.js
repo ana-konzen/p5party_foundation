@@ -51,14 +51,15 @@ export function addToQueue(imageInfo) {
 }
 
 function sortQueue() {
-  // sort images by z position if y is the same
+  // sort images by z, then by y
   assetsQueue.sort((a, b) => {
-    if (a.y === b.y) {
-      const aZ = a.z ?? 0;
-      const bZ = b.z ?? 0;
-      return aZ - bZ;
+    if (a.z !== b.z) {
+      return a.z - b.z;
     }
-    return a.y - b.y;
+    if (a.y !== b.y) {
+      return a.y - b.y;
+    }
+    return 0;
   });
 }
 
