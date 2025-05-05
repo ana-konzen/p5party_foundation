@@ -73,11 +73,12 @@ export function drawQueue() {
     const imgRatio = img.width / img.height;
     const imgW = CONFIG.grid.width;
     const imgH = CONFIG.grid.width / imgRatio;
+    const yOffset = path.includes("door") ? CONFIG.grid.height : 0;
 
     image(
       img,
       x * CONFIG.grid.width + CONFIG.grid.width / 2,
-      y * CONFIG.grid.height - imgH / 2 + CONFIG.grid.height,
+      y * CONFIG.grid.height - imgH / 2 + CONFIG.grid.height + yOffset,
       imgW,
       imgH
     );

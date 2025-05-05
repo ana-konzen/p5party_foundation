@@ -95,7 +95,7 @@ const doorTemplate = {
       path: `items.door.${this.open ? "open" : "closed"}`,
       x: this.x,
       y: this.y,
-      z: this.z ?? 0,
+      z: 2,
     });
   },
   blocksMove: function () {

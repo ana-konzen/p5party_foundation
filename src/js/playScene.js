@@ -145,6 +145,7 @@ function drawMap() {
         path: `${shared.map[x][y]}.${score}`,
         x: x,
         y: y,
+        z: 0,
       });
     }
   }
