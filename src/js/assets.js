@@ -80,6 +80,38 @@ export function preload() {
     },
     treasure: loadImage("assets/items/treasure.png"),
   };
+
+  assets.ground = {
+    darkest: [
+      loadImage("assets/ground/darkest/1.png"),
+      loadImage("assets/ground/darkest/2.png"),
+      loadImage("assets/ground/darkest/3.png"),
+    ],
+    dark: [
+      loadImage("assets/ground/dark/1.png"),
+      loadImage("assets/ground/dark/2.png"),
+      loadImage("assets/ground/dark/3.png"),
+    ],
+    light: [
+      loadImage("assets/ground/light/1.png"),
+      loadImage("assets/ground/light/2.png"),
+      loadImage("assets/ground/light/3.png"),
+      loadImage("assets/ground/light/4.png"),
+      loadImage("assets/ground/light/5.png"),
+      loadImage("assets/ground/light/6.png"),
+      loadImage("assets/ground/light/7.png"),
+      loadImage("assets/ground/light/8.png"),
+    ],
+    lightest: [
+      loadImage("assets/ground/lightest/1.png"),
+      loadImage("assets/ground/lightest/2.png"),
+      loadImage("assets/ground/lightest/3.png"),
+    ],
+    highlight: [
+      loadImage("assets/ground/highlight/1.png"),
+      loadImage("assets/ground/highlight/2.png"),
+    ],
+  };
 }
 
 export function setup() {
