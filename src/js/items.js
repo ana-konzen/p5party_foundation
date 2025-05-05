@@ -12,7 +12,7 @@ const itemTemplate = {
   assetPath: undefined, // string path on assets object to items image "items.crate.2"
   x: 0, // number — x position in grid widths
   y: 0, // number — y position in grid heights
-  z: 0, // number — sorting hint for vertically aligned items
+  sort: 0, // number — sorting hint for vertically aligned items
 
   // init - function — called when item is created
 
@@ -30,7 +30,7 @@ const itemTemplate = {
       path: this.assetPath,
       x: this.x,
       y: this.y,
-      z: this.z ?? 0,
+      sort: this.sort ?? 0,
     });
   },
 };
@@ -41,7 +41,7 @@ const crateTemplate = {
   type: "crate",
   mapSymbol: "▢",
   assetPath: "items.crate.1",
-  z: 2,
+  sort: 2,
 
   alpha: 255,
   hits: 0,
@@ -59,7 +59,7 @@ const waterTemplate = {
   type: "water",
   mapSymbol: "≈",
   assetPath: "items.water",
-  z: 1,
+  sort: 1,
 
   hits: 0,
 
@@ -95,7 +95,7 @@ const doorTemplate = {
       path: `items.door.${this.open ? "open" : "closed"}`,
       x: this.x,
       y: this.y,
-      z: 2,
+      sort: 1,
     });
   },
   blocksMove: function () {
@@ -120,7 +120,7 @@ const floorSwitchTemplate = {
       path: `items.floorSwitch.${this.state}`,
       x: this.x,
       y: this.y,
-      z: this.z ?? 0,
+      sort: this.sort ?? 0,
     });
   },
 };
@@ -135,7 +135,7 @@ const bulletTemplate = {
   type: "bullet",
   mapSymbol: false,
 
-  z: 2,
+  sort: 2,
   player: "player1",
 
   draw: function () {
@@ -143,7 +143,7 @@ const bulletTemplate = {
       path: `items.bullet.${this.player}`,
       x: this.x,
       y: this.y,
-      z: this.z ?? 0,
+      sort: this.sort ?? 0,
     });
   },
 };

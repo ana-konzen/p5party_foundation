@@ -51,10 +51,10 @@ export function addToQueue(imageInfo) {
 }
 
 function sortQueue() {
-  // sort images by z, then by y
+  // sort images by sort, then by y
   assetsQueue.sort((a, b) => {
-    if (a.z !== b.z) {
-      return a.z - b.z;
+    if (a.sort !== b.sort) {
+      return a.sort - b.sort;
     }
     if (a.y !== b.y) {
       return a.y - b.y;

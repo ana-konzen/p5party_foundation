@@ -145,7 +145,7 @@ function drawMap() {
         path: `${shared.map[x][y]}.${score}`,
         x: x,
         y: y,
-        z: 0,
+        sort: 0,
       });
     }
   }
@@ -157,7 +157,7 @@ function drawPlayers() {
       path: `${key}.${player.facing}`,
       x: localPlayer(player).x,
       y: localPlayer(player).y,
-      z: 2,
+      sort: 2,
     });
   }
 }
